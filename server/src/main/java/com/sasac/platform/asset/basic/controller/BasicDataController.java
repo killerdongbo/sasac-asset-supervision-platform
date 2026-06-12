@@ -132,8 +132,14 @@ public class BasicDataController {
     }
 
     // ---------------------------------------------------------------
-    // AssetCategory (read-only)
+    // AssetCategory
     // ---------------------------------------------------------------
+
+    @PostMapping("/asset-categories")
+    public ResponseEntity<ApiResponse<AssetCategory>> createCategory(
+            @RequestBody AssetCategory category) {
+        return ResponseEntity.ok(ApiResponse.success(basicDataService.createCategory(category)));
+    }
 
     @GetMapping("/asset-categories")
     public ResponseEntity<ApiResponse<List<AssetCategory>>> listAssetCategories() {
@@ -143,5 +149,17 @@ public class BasicDataController {
     @GetMapping("/asset-categories/{id}")
     public ResponseEntity<ApiResponse<AssetCategory>> getAssetCategory(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(basicDataService.getAssetCategory(id)));
+    }
+
+    @PutMapping("/asset-categories/{id}")
+    public ResponseEntity<ApiResponse<AssetCategory>> updateCategory(@PathVariable Long id,
+                                                                     @RequestBody AssetCategory category) {
+        return ResponseEntity.ok(ApiResponse.success(basicDataService.updateCategory(id, category)));
+    }
+
+    @DeleteMapping("/asset-categories/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
+        basicDataService.deleteCategory(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

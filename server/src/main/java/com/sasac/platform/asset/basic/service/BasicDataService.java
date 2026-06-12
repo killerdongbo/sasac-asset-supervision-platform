@@ -54,13 +54,17 @@ public class BasicDataService {
     @Transactional
     public Location updateLocation(Long id, Location update) {
         Location existing = getLocation(id);
-        if (update.getName() != null) existing.setName(update.getName());
-        if (update.getAddress() != null) existing.setAddress(update.getAddress());
-        if (update.getParentId() != null) existing.setParentId(update.getParentId());
-        if (update.getSortOrder() != null) existing.setSortOrder(update.getSortOrder());
-        if (update.getStatus() != null) existing.setStatus(update.getStatus());
-        if (update.getTenantId() != null) existing.setTenantId(update.getTenantId());
-        locationMapper.updateById(existing);
+        Location merged = new Location();
+        merged.setId(id);
+        merged.setName(update.getName() != null ? update.getName() : existing.getName());
+        merged.setAddress(update.getAddress() != null ? update.getAddress() : existing.getAddress());
+        merged.setParentId(update.getParentId() != null ? update.getParentId() : existing.getParentId());
+        merged.setSortOrder(update.getSortOrder() != null ? update.getSortOrder() : existing.getSortOrder());
+        merged.setStatus(update.getStatus() != null ? update.getStatus() : existing.getStatus());
+        merged.setTenantId(update.getTenantId() != null ? update.getTenantId() : existing.getTenantId());
+        merged.setCreatedAt(existing.getCreatedAt());
+        merged.setDeleted(existing.getDeleted());
+        locationMapper.updateById(merged);
         return locationMapper.selectById(id);
     }
 
@@ -96,13 +100,17 @@ public class BasicDataService {
     @Transactional
     public Supplier updateSupplier(Long id, Supplier update) {
         Supplier existing = getSupplier(id);
-        if (update.getName() != null) existing.setName(update.getName());
-        if (update.getContact() != null) existing.setContact(update.getContact());
-        if (update.getPhone() != null) existing.setPhone(update.getPhone());
-        if (update.getAddress() != null) existing.setAddress(update.getAddress());
-        if (update.getBusinessScope() != null) existing.setBusinessScope(update.getBusinessScope());
-        if (update.getStatus() != null) existing.setStatus(update.getStatus());
-        supplierMapper.updateById(existing);
+        Supplier merged = new Supplier();
+        merged.setId(id);
+        merged.setName(update.getName() != null ? update.getName() : existing.getName());
+        merged.setContact(update.getContact() != null ? update.getContact() : existing.getContact());
+        merged.setPhone(update.getPhone() != null ? update.getPhone() : existing.getPhone());
+        merged.setAddress(update.getAddress() != null ? update.getAddress() : existing.getAddress());
+        merged.setBusinessScope(update.getBusinessScope() != null ? update.getBusinessScope() : existing.getBusinessScope());
+        merged.setStatus(update.getStatus() != null ? update.getStatus() : existing.getStatus());
+        merged.setCreatedAt(existing.getCreatedAt());
+        merged.setDeleted(existing.getDeleted());
+        supplierMapper.updateById(merged);
         return supplierMapper.selectById(id);
     }
 
@@ -138,12 +146,16 @@ public class BasicDataService {
     @Transactional
     public MaintenanceProvider updateMaintenanceProvider(Long id, MaintenanceProvider update) {
         MaintenanceProvider existing = getMaintenanceProvider(id);
-        if (update.getName() != null) existing.setName(update.getName());
-        if (update.getContact() != null) existing.setContact(update.getContact());
-        if (update.getPhone() != null) existing.setPhone(update.getPhone());
-        if (update.getServiceTypes() != null) existing.setServiceTypes(update.getServiceTypes());
-        if (update.getStatus() != null) existing.setStatus(update.getStatus());
-        maintenanceProviderMapper.updateById(existing);
+        MaintenanceProvider merged = new MaintenanceProvider();
+        merged.setId(id);
+        merged.setName(update.getName() != null ? update.getName() : existing.getName());
+        merged.setContact(update.getContact() != null ? update.getContact() : existing.getContact());
+        merged.setPhone(update.getPhone() != null ? update.getPhone() : existing.getPhone());
+        merged.setServiceTypes(update.getServiceTypes() != null ? update.getServiceTypes() : existing.getServiceTypes());
+        merged.setStatus(update.getStatus() != null ? update.getStatus() : existing.getStatus());
+        merged.setCreatedAt(existing.getCreatedAt());
+        merged.setDeleted(existing.getDeleted());
+        maintenanceProviderMapper.updateById(merged);
         return maintenanceProviderMapper.selectById(id);
     }
 
@@ -154,8 +166,14 @@ public class BasicDataService {
     }
 
     // ---------------------------------------------------------------
-    // AssetCategory (read-only)
+    // AssetCategory
     // ---------------------------------------------------------------
+
+    @Transactional
+    public AssetCategory createCategory(AssetCategory category) {
+        assetCategoryMapper.insert(category);
+        return category;
+    }
 
     public List<AssetCategory> listAssetCategories() {
         return assetCategoryMapper.selectList(
@@ -168,5 +186,29 @@ public class BasicDataService {
             throw new BusinessException("资产分类不存在");
         }
         return c;
+    }
+
+    @Transactional
+    public AssetCategory updateCategory(Long id, AssetCategory update) {
+        AssetCategory existing = getAssetCategory(id);
+        AssetCategory merged = new AssetCategory();
+        merged.setId(id);
+        merged.setCode(update.getCode() != null ? update.getCode() : existing.getCode());
+        merged.setName(update.getName() != null ? update.getName() : existing.getName());
+        merged.setParentId(update.getParentId() != null ? update.getParentId() : existing.getParentId());
+        merged.setLevel(update.getLevel() != null ? update.getLevel() : existing.getLevel());
+        merged.setDepreciationMethod(update.getDepreciationMethod() != null ? update.getDepreciationMethod() : existing.getDepreciationMethod());
+        merged.setDefaultUsefulLife(update.getDefaultUsefulLife() != null ? update.getDefaultUsefulLife() : existing.getDefaultUsefulLife());
+        merged.setDefaultResidualRate(update.getDefaultResidualRate() != null ? update.getDefaultResidualRate() : existing.getDefaultResidualRate());
+        merged.setCreatedAt(existing.getCreatedAt());
+        merged.setDeleted(existing.getDeleted());
+        assetCategoryMapper.updateById(merged);
+        return assetCategoryMapper.selectById(id);
+    }
+
+    @Transactional
+    public void deleteCategory(Long id) {
+        getAssetCategory(id);
+        assetCategoryMapper.deleteById(id);
     }
 }
