@@ -37,6 +37,14 @@ public class ApprovalController {
      * @param def the approval definition
      * @return API response with the created definition
      */
+    @GetMapping("/approval-defs")
+    public ResponseEntity<ApiResponse<List<ApprovalDef>>> getDefs() {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getAllDefs()));
+    }
+
+    /**
+     * Creates a new approval definition.
+     */
     @PostMapping("/approval-defs")
     public ResponseEntity<ApiResponse<ApprovalDef>> createDef(@Valid @RequestBody ApprovalDef def) {
         ApprovalDef created = approvalService.createDef(def);
@@ -98,8 +106,8 @@ public class ApprovalController {
      */
     @GetMapping("/approval-instances/pending")
     public ResponseEntity<ApiResponse<List<ApprovalInstance>>> getPendingApprovals(
-            @RequestParam Long tenantId,
-            @RequestParam String roleCode) {
+            @RequestParam(required = false) Long tenantId,
+            @RequestParam(required = false) String roleCode) {
         List<ApprovalInstance> instances = approvalService.getPendingApprovals(tenantId, roleCode);
         return ResponseEntity.ok(ApiResponse.success(instances));
     }

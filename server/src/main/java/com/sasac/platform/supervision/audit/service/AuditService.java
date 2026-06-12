@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,17 +63,19 @@ public class AuditService {
                         .eq(OperationLog::getTargetId, assetId)
         );
         for (OperationLog log : logs) {
-            timeline.add(Map.of(
-                    "type", "OPERATION",
-                    "timestamp", log.getCreatedAt() != null ? log.getCreatedAt().toString() : "",
-                    "data", Map.of(
-                            "id", log.getId(),
-                            "action", log.getAction(),
-                            "operatorName", log.getOperatorName(),
-                            "beforeData", log.getBeforeData(),
-                            "afterData", log.getAfterData()
-                    )
-            ));
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("type", "OPERATION");
+            entry.put("timestamp", log.getCreatedAt() != null ? log.getCreatedAt().toString() : "");
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", log.getId());
+            data.put("action", log.getAction());
+            data.put("operatorName", log.getOperatorName());
+            data.put("beforeData", log.getBeforeData());
+            data.put("afterData", log.getAfterData());
+            entry.put("data", data);
+
+            timeline.add(entry);
         }
 
         // Collect AssetChangeLog entries
@@ -81,18 +84,20 @@ public class AuditService {
                         .eq(AssetChangeLog::getAssetId, assetId)
         );
         for (AssetChangeLog change : changes) {
-            timeline.add(Map.of(
-                    "type", "FIELD_CHANGE",
-                    "timestamp", change.getCreatedAt() != null ? change.getCreatedAt().toString() : "",
-                    "data", Map.of(
-                            "id", change.getId(),
-                            "field", change.getChangeField(),
-                            "beforeValue", change.getBeforeValue(),
-                            "afterValue", change.getAfterValue(),
-                            "operatorId", change.getOperatorId(),
-                            "remark", change.getRemark() != null ? change.getRemark() : ""
-                    )
-            ));
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("type", "FIELD_CHANGE");
+            entry.put("timestamp", change.getCreatedAt() != null ? change.getCreatedAt().toString() : "");
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", change.getId());
+            data.put("field", change.getChangeField());
+            data.put("beforeValue", change.getBeforeValue());
+            data.put("afterValue", change.getAfterValue());
+            data.put("operatorId", change.getOperatorId());
+            data.put("remark", change.getRemark() != null ? change.getRemark() : "");
+            entry.put("data", data);
+
+            timeline.add(entry);
         }
 
         // Sort by timestamp ascending

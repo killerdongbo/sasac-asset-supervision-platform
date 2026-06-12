@@ -67,8 +67,10 @@ public class AlertService {
      * @return list of alert rules
      */
     public List<AlertRule> listRules(Long tenantId, String alertType) {
-        LambdaQueryWrapper<AlertRule> wrapper = new LambdaQueryWrapper<AlertRule>()
-                .eq(AlertRule::getTenantId, tenantId);
+        LambdaQueryWrapper<AlertRule> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null) {
+            wrapper.eq(AlertRule::getTenantId, tenantId);
+        }
         if (alertType != null && !alertType.isBlank()) {
             wrapper.eq(AlertRule::getAlertType, alertType);
         }
@@ -101,8 +103,10 @@ public class AlertService {
      * @return list of alert records
      */
     public List<AlertRecord> listRecords(Long tenantId, String alertType, String status) {
-        LambdaQueryWrapper<AlertRecord> wrapper = new LambdaQueryWrapper<AlertRecord>()
-                .eq(AlertRecord::getTenantId, tenantId);
+        LambdaQueryWrapper<AlertRecord> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null) {
+            wrapper.eq(AlertRecord::getTenantId, tenantId);
+        }
         if (alertType != null && !alertType.isBlank()) {
             wrapper.eq(AlertRecord::getAlertType, alertType);
         }

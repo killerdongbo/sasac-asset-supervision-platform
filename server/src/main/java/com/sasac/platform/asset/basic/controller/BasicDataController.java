@@ -26,7 +26,7 @@ import java.util.List;
  * and AssetCategories under the {@code /api/basic-data} prefix.
  */
 @RestController
-@RequestMapping("/api/basic-data")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class BasicDataController {
 
@@ -135,29 +135,29 @@ public class BasicDataController {
     // AssetCategory
     // ---------------------------------------------------------------
 
-    @PostMapping("/asset-categories")
+    @PostMapping("/categories")
     public ResponseEntity<ApiResponse<AssetCategory>> createCategory(
             @RequestBody AssetCategory category) {
         return ResponseEntity.ok(ApiResponse.success(basicDataService.createCategory(category)));
     }
 
-    @GetMapping("/asset-categories")
+    @GetMapping("/categories")
     public ResponseEntity<ApiResponse<List<AssetCategory>>> listAssetCategories() {
         return ResponseEntity.ok(ApiResponse.success(basicDataService.listAssetCategories()));
     }
 
-    @GetMapping("/asset-categories/{id}")
+    @GetMapping("/categories/{id}")
     public ResponseEntity<ApiResponse<AssetCategory>> getAssetCategory(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(basicDataService.getAssetCategory(id)));
     }
 
-    @PutMapping("/asset-categories/{id}")
+    @PutMapping("/categories/{id}")
     public ResponseEntity<ApiResponse<AssetCategory>> updateCategory(@PathVariable Long id,
                                                                      @RequestBody AssetCategory category) {
         return ResponseEntity.ok(ApiResponse.success(basicDataService.updateCategory(id, category)));
     }
 
-    @DeleteMapping("/asset-categories/{id}")
+    @DeleteMapping("/categories/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         basicDataService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.success(null));

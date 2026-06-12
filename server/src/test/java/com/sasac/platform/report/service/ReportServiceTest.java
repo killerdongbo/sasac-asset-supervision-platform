@@ -107,7 +107,9 @@ class ReportServiceTest {
         assertThat(data).containsKey("statusSummary");
 
         // Assert total asset count
-        assertThat(((Number) data.get("totalAssets")).intValue()).isEqualTo(3);
+        Object totalAssets = data.get("totalAssets");
+        int totalVal = totalAssets instanceof Number ? ((Number) totalAssets).intValue() : Integer.parseInt(totalAssets.toString());
+        assertThat(totalVal).isEqualTo(3);
 
         // Assert category summary - EQUIPMENT should have count 2
         @SuppressWarnings("unchecked")
@@ -117,7 +119,9 @@ class ReportServiceTest {
                 .findFirst()
                 .orElse(null);
         assertThat(equipmentSummary).isNotNull();
-        assertThat(((Number) equipmentSummary.get("count")).intValue()).isEqualTo(2);
+        Object eqCount = equipmentSummary.get("count");
+        int eqCountVal = eqCount instanceof Number ? ((Number) eqCount).intValue() : Integer.parseInt(eqCount.toString());
+        assertThat(eqCountVal).isEqualTo(2);
 
         // Assert status summary - IN_USE should have count 2
         @SuppressWarnings("unchecked")
@@ -127,7 +131,9 @@ class ReportServiceTest {
                 .findFirst()
                 .orElse(null);
         assertThat(inUseSummary).isNotNull();
-        assertThat(((Number) inUseSummary.get("count")).intValue()).isEqualTo(2);
+        Object inUseCount = inUseSummary.get("count");
+        int inUseVal = inUseCount instanceof Number ? ((Number) inUseCount).intValue() : Integer.parseInt(inUseCount.toString());
+        assertThat(inUseVal).isEqualTo(2);
     }
 
     @Test

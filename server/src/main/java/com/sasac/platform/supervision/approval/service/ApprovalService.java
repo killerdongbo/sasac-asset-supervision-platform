@@ -43,6 +43,10 @@ public class ApprovalService {
      * @param def the approval definition to create
      * @return the saved definition with generated ID
      */
+    public List<ApprovalDef> getAllDefs() {
+        return approvalDefMapper.selectList(null);
+    }
+
     @Transactional
     public ApprovalDef createDef(ApprovalDef def) {
         def.setCreatedAt(LocalDateTime.now());
