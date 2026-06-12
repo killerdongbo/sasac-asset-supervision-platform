@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',monospace;background:#1e1e2e;color:#cdd6f4;padding:30px}
+h1{text-align:center;font-size:22px;margin-bottom:30px;color:#89b4fa}
+h2{font-size:16px;color:#a6e3a1;margin:20px 0 12px 0;padding-left:10px;border-left:3px solid #a6e3a1}
+.tree{font-size:13px;line-height:2;padding-left:20px}
+.dir{color:#89b4fa;font-weight:700}
+.file{color:#cdd6f4}
+.comment{color:#6c7086;font-style:italic}
+.pkg{color:#f9e2af}
+.domain-label{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:8px}
+.d-enterprise{background:#1e3a5f;color:#89dceb}
+.d-supervision{background:#3e2a1e;color:#fab387}
+.d-platform{background:#1e3e2a;color:#a6e3a1}
+.deploy{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.deploy-box{flex:1;min-width:150px;background:#313244;border-radius:10px;padding:14px;text-align:center;border:2px solid #45475a}
+.deploy-box .title{font-weight:700;font-size:14px;color:#89b4fa}
+.deploy-box .info{font-size:12px;color:#a6adc8;margin-top:4px}
+</style></head><body>
+<h1>📁 代码组织架构</h1>
+
+<h2>⚙️ 平台基础域 — 横切关注点 <span class="domain-label d-platform">platform</span></h2>
+<div class="tree">
+<div><span class="dir">common/</span><span class="comment"> — 横切基础设施</span></div>
+<div style="padding-left:20px"><span class="dir">config/</span><span class="comment"> WebMvc · Redis · MinIO · MyBatis-Plus · CORS · Jackson</span></div>
+<div style="padding-left:20px"><span class="dir">exception/</span><span class="comment"> GlobalExceptionHandler · BusinessException</span></div>
+<div style="padding-left:20px"><span class="dir">response/</span><span class="comment"> ApiResponse&lt;T&gt;</span></div>
+<div style="padding-left:20px"><span class="dir">tenant/</span><span class="comment"> TenantContext · TenantInterceptor</span></div>
+<div style="padding-left:20px"><span class="dir">base/</span><span class="comment"> BaseEntity</span></div>
+<div style="padding-left:20px"><span class="dir">log/</span><span class="comment"> OperationLog AOP 切面</span></div>
+</div>
+<div class="tree" style="margin-top:8px">
+<div><span class="dir">auth/</span><span class="comment"> — 认证授权</span></div>
+<div style="padding-left:20px"><span class="pkg">controller/</span> AuthController</div>
+<div style="padding-left:20px"><span class="pkg">service/</span> AuthService</div>
+<div style="padding-left:20px"><span class="pkg">security/</span> JwtUtil · JwtAuthFilter · SecurityConfig</div>
+</div>
+<div class="tree" style="margin-top:8px">
+<div><span class="dir">organization/</span><span class="comment"> — 组织权限管理</span></div>
+<div style="padding-left:20px"><span class="pkg">controller/</span> · <span class="pkg">service/</span> · <span class="pkg">entity/</span> · <span class="pkg">mapper/</span></div>
+</div>
+<div class="tree" style="margin-top:8px">
+<div><span class="dir">system/</span><span class="comment"> — 系统配置/字典/导入导出</span></div>
+</div>
+
+<h2>🏢 企业资产管理域 <span class="domain-label d-enterprise">asset</span></h2>
+<div class="tree">
+<div><span class="dir">asset/</span></div>
+<div style="padding-left:20px"><span class="dir">basic/</span><span class="comment"> 资产基础资料 → 分类/位置/供应商/维保商</span></div>
+<div style="padding-left:20px"><span class="dir">ledger/</span><span class="comment"> 资产台账管理 → CRUD/标签/变更记录</span></div>
+<div style="padding-left:20px"><span class="dir">circulation/</span><span class="comment"> 资产流转管理 → 入库/领用/调拨/报废</span></div>
+<div style="padding-left:20px"><span class="dir">procurement/</span><span class="comment"> 采购管理 → 申请/验收/转资产</span></div>
+<div style="padding-left:20px"><span class="dir">inspection/</span><span class="comment"> 巡检管理 → 任务/记录/异常</span></div>
+<div style="padding-left:20px"><span class="dir">inventory/</span><span class="comment"> 盘点管理 → 任务/记录/差异</span></div>
+<div style="padding-left:20px"><span class="dir">maintenance/</span><span class="comment"> 维保维修管理</span></div>
+<div style="padding-left:20px"><span class="dir">depreciation/</span><span class="comment"> 财务折旧管理</span></div>
+</div>
+
+<h2>🏛 国资监管域 <span class="domain-label d-supervision">supervision</span></h2>
+<div class="tree">
+<div><span class="dir">supervision/</span></div>
+<div style="padding-left:20px"><span class="dir">dashboard/</span><span class="comment"> 工作台/驾驶舱</span></div>
+<div style="padding-left:20px"><span class="dir">report/</span><span class="comment"> 监管上报 → 报表/快照/审核链</span></div>
+<div style="padding-left:20px"><span class="dir">statistics/</span><span class="comment"> 统计报表</span></div>
+<div style="padding-left:20px"><span class="dir">approval/</span><span class="comment"> 审批工作流引擎</span></div>
+<div style="padding-left:20px"><span class="dir">alert/</span><span class="comment"> 预警中心</span></div>
+<div style="padding-left:20px"><span class="dir">audit/</span><span class="comment"> 审计追溯</span></div>
+<div style="padding-left:20px"><span class="dir">financial/</span><span class="comment"> 财务对接</span></div>
+</div>
+
+<h1 style="margin-top:40px;text-align:center;font-size:22px;color:#89b4fa">☁️ 部署架构</h1>
+<div class="deploy" style="margin-top:20px">
+<div class="deploy-box" style="border-color:#f9e2af"><div class="title" style="color:#f9e2af">🌐 Nginx</div><div class="info">反向代理 + HTTPS<br>静态资源 + 负载均衡</div></div>
+</div>
+<div style="text-align:center;color:#6c7086;margin:4px 0">⬇</div>
+<div class="deploy">
+<div class="deploy-box" style="border-color:#89b4fa"><div class="title">🖥️ Vue3 SPA</div><div class="info">Nginx静态托管<br>Element Plus UI</div></div>
+<div class="deploy-box" style="border-color:#a6e3a1"><div class="title">⚙️ SpringBoot :8080</div><div class="info">模块化单体应用<br>MyBatis-Plus ORM</div></div>
+</div>
+<div style="text-align:center;color:#6c7086;margin:4px 0">⬇</div>
+<div class="deploy">
+<div class="deploy-box" style="border-color:#cba6f7"><div class="title" style="color:#cba6f7">🗄️ PostgreSQL</div><div class="info">:5432 · Flyway迁移<br>PostGIS · JSONB</div></div>
+<div class="deploy-box" style="border-color:#f38ba8"><div class="title" style="color:#f38ba8">⚡ Redis</div><div class="info">:6379 · 缓存+Session<br>预警结果缓存</div></div>
+<div class="deploy-box" style="border-color:#fab387"><div class="title" style="color:#fab387">📦 MinIO</div><div class="info">:9000 · 对象存储<br>照片/附件/导出</div></div>
+</div>
+<div style="text-align:center;margin-top:16px;padding:12px;background:#313244;border-radius:8px;font-size:13px;color:#a6adc8">
+🐳 Docker Compose 一键部署 · 单机 4C16G 起步 · 后续可扩展 K8s 集群
+</div>
+</body></html>

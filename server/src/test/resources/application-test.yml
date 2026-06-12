@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/testdb}
+    username: ${TEST_DB_USERNAME:test}
+    password: ${TEST_DB_PASSWORD:test}
+  flyway:
+    enabled: true
+
+jwt:
+  secret: test-jwt-secret-key-that-is-long-enough-for-hs256-algorithm
+  expiration: 3600000
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: test
+  secret-key: test
+  bucket: test-bucket

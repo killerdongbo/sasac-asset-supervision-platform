@@ -55,13 +55,17 @@ services:
     container_name: sasac-server
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8082:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sasac_platform
       SPRING_DATASOURCE_USERNAME: sasac
-      SPRING_DATASOURCE_PASSWORD: sasac123
+      DB_PASSWORD: sasac123
       SPRING_DATA_REDIS_HOST: redis
       MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      JWT_SECRET: sasac-platform-jwt-secret-key-minimum-256-bits
+      JWT_EXPIRATION: 86400000
     depends_on:
       postgres:
         condition: service_healthy

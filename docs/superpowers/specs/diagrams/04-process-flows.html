@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',sans-serif;background:#f5f7fa;padding:30px}
+h1{text-align:center;color:#1a237e;font-size:24px;margin-bottom:25px}
+.flow{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.flow h3{font-size:18px;color:#333;margin-bottom:16px;padding-left:12px;border-left:4px solid #1976d2}
+.steps{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center}
+.step{padding:12px 16px;border-radius:10px;text-align:center;min-width:100px;font-size:13px}
+.step .icon{font-size:24px;margin-bottom:4px}
+.step .title{font-weight:700;font-size:14px}
+.step .desc{font-size:11px;color:#777;margin-top:2px}
+.step1{background:#e3f2fd;border:2px solid #1976d2}
+.step2{background:#e8f5e9;border:2px solid #388e3c}
+.step3{background:#fff3e0;border:2px solid #f57c00}
+.step4{background:#fce4ec;border:2px solid #c62828}
+.step5{background:#f3e5f5;border:2px solid #7b1fa2}
+.arrow-step{font-size:22px;color:#999;margin:0 2px;font-weight:700}
+.sub-flow{padding:10px 16px;background:#fafafa;border-radius:8px;font-size:12px;color:#666;margin-top:12px;text-align:center}
+.note-box{padding:10px 16px;border-left:4px solid #ff9800;background:#fff8e1;border-radius:4px;font-size:13px;margin-top:12px}
+</style></head><body>
+<h1>🔄 核心业务流程图</h1>
+
+<div class="flow"><h3>1. 资产全生命周期</h3>
+<div class="steps">
+<div class="step step1"><div class="icon">📥</div><div class="title">资产新增</div><div class="desc">采购验收·划转入库</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">🔧</div><div class="title">使用管理</div><div class="desc">领用·维修·盘点</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">🔄</div><div class="title">变动流转</div><div class="desc">调拨·转让·抵押</div></div>
+<div class="arrow-step">→</div>
+<div class="step step4"><div class="icon">📉</div><div class="title">折旧摊销</div><div class="desc">月折旧计提</div></div>
+<div class="arrow-step">→</div>
+<div class="step step5"><div class="icon">🗑️</div><div class="title">资产处置</div><div class="desc">报废·出售·核销</div></div>
+</div>
+<div class="note-box">🔍 全程可追溯审计：每个资产拥有完整操作日志和变更历史链</div></div>
+
+<div class="flow"><h3>2. 巡检管理流程</h3>
+<div class="steps">
+<div class="step step1"><div class="icon">📋</div><div class="title">制定巡检任务</div><div class="desc">选择资产范围<br>指定巡检人</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">📤</div><div class="title">任务分发跟踪</div><div class="desc">推送至巡检人<br>系统跟踪进度</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">✅</div><div class="title">现场巡检登记</div><div class="desc">逐项检查记录<br>拍照留证</div></div>
+<div class="arrow-step">→</div>
+<div class="step step4"><div class="icon">⚠️</div><div class="title">异常处理</div><div class="desc">正常→完成<br>异常→转维修</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">📁</div><div class="title">任务完成归档</div><div class="desc">统计报告<br>超期预警</div></div>
+</div>
+<div class="note-box">⚠️ 超期预警：超过计划截止日期仍未完成 → 自动触发预警</div></div>
+
+<div class="flow"><h3>3. 盘点管理流程</h3>
+<div class="steps">
+<div class="step step1"><div class="icon">📊</div><div class="title">制定盘点计划</div><div class="desc">按部门/位置<br>生成盘点清单</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">🔍</div><div class="title">现场盘点登记</div><div class="desc">逐项核实数量<br>记录位置/状态</div></div>
+<div class="arrow-step">→</div>
+<div class="step step4"><div class="icon">⚡</div><div class="title">自动差异识别</div><div class="desc">账面vs实际比对<br>盘盈/盘亏/不符</div></div>
+<div class="arrow-step">→</div>
+<div class="step step5"><div class="icon">📝</div><div class="title">差异处理</div><div class="desc">差异报告→审批<br>确认→台账调整</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">📁</div><div class="title">盘点归档</div><div class="desc">盘点报告<br>差异存档备查</div></div>
+</div>
+<div class="note-box">⚡ 关键：差异识别由系统自动完成，人工确认后通过审批流程调整台账</div></div>
+
+<div class="flow"><h3>4. 采购管理流程</h3>
+<div class="steps">
+<div class="step step1"><div class="icon">📝</div><div class="title">采购申请</div><div class="desc">填写需求<br>关联供应商</div></div>
+<div class="arrow-step">→</div>
+<div class="step step5"><div class="icon">✅</div><div class="title">审批</div><div class="desc">部门→管理层<br>金额条件分支</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">📦</div><div class="title">采购验收</div><div class="desc">到货核对<br>数量/规格/质量</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">🔄</div><div class="title">采购转资产</div><div class="desc">自动带入采购信息<br>生成资产编号<br>一步入库登记</div></div>
+</div>
+<div class="note-box">💡 关键：验收通过后"采购转资产"一步完成，避免重复录入</div></div>
+
+<div class="flow"><h3>5. 维保维修管理（双路径）</h3>
+<div class="steps">
+<div class="step step1"><div class="icon">🅰️</div><div class="title">路径A：手动发起</div><div class="desc">维保维修申请<br>关联维保商</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">🔧</div><div class="title">派工处理</div><div class="desc">指派维保人员<br>现场维修</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">📋</div><div class="title">维修登记</div><div class="desc">结果/费用登记<br>历史归档</div></div>
+</div>
+<div style="text-align:center;margin:8px 0;color:#999">⬇ 路径B：巡检异常自动转入 ⬇</div>
+<div class="steps">
+<div class="step step4"><div class="icon">🅱️</div><div class="title">路径B：巡检转入</div><div class="desc">巡检异常<br>一键转维修</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">🔧</div><div class="title">派工处理</div><div class="desc">自动带入资产信息<br>+ 异常描述</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">📋</div><div class="title">维修登记</div><div class="desc">结果/费用登记<br>异常闭环</div></div>
+</div></div>
+
+<div class="flow"><h3>6. 监管上报-确认模式</h3>
+<div class="steps">
+<div class="step step1"><div class="icon">🏢</div><div class="title">企业填报</div><div class="desc">系统自动汇总<br>企业补充校验</div></div>
+<div class="arrow-step">→</div>
+<div class="step step2"><div class="icon">👥</div><div class="title">集团审核</div><div class="desc">审核汇总<br>可驳回修正</div></div>
+<div class="arrow-step">→</div>
+<div class="step step3"><div class="icon">🏛️</div><div class="title">国资委接收</div><div class="desc">进入监管库<br>自动校验比对</div></div>
+<div class="arrow-step">→</div>
+<div class="step step5"><div class="icon">📡</div><div class="title">省平台对接</div><div class="desc">按省标准转换<br>定期自动上报</div></div>
+</div>
+<div class="note-box">🔒 保护机制：企业提交前数据仅自己可见可修改 · 上报后锁定 · 变更需走变更流程 · 每次上报生成版本快照</div></div>
+
+<div class="flow"><h3>7. 预警中心 — 4 类自动预警</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+<div style="padding:12px;background:#ffebee;border-radius:8px;border-left:4px solid #f44336">
+<div style="font-weight:700;font-size:14px">🔔 维保到期预警</div>
+<div style="font-size:12px;color:#666;margin-top:4px">到期前7天/当天/超期三级预警<br>扫描 MaintenanceRecord 维保到期日</div>
+</div>
+<div style="padding:12px;background:#fff3e0;border-radius:8px;border-left:4px solid #ff9800">
+<div style="font-weight:700;font-size:14px">🔔 巡检超期预警</div>
+<div style="font-size:12px;color:#666;margin-top:4px">超过计划截止日期仍未完成<br>扫描 InspectionTask end_date已过</div>
+</div>
+<div style="padding:12px;background:#e3f2fd;border-radius:8px;border-left:4px solid #2196f3">
+<div style="font-weight:700;font-size:14px">🔔 借用超期预警</div>
+<div style="font-size:12px;color:#666;margin-top:4px">超过约定归还时间<br>扫描 Assignment expected_return_date</div>
+</div>
+<div style="padding:12px;background:#e8f5e9;border-radius:8px;border-left:4px solid:#4caf50">
+<div style="font-weight:700;font-size:14px">🔔 闲置资产预警</div>
+<div style="font-size:12px;color:#666;margin-top:4px">IDLE状态超N天无变动<br>扫描 use_status=IDLE 且超期</div>
+</div>
+</div>
+<div class="note-box">⚙️ 统一使用 AlertRule 配置阈值参数 · Spring @Scheduled 定时扫描 · 生成 AlertRecord 推送工作台</div></div>
+
+<div class="flow"><h3>8. 审批工作流状态机</h3>
+<div class="steps">
+<div class="step" style="background:#e3f2fd;border:2px solid #1976d2"><div class="icon">📝</div><div class="title">DRAFT 草稿</div></div>
+<div class="arrow-step">→ 提交 →</div>
+<div class="step" style="background:#fff3e0;border:2px solid #f57c00"><div class="icon">⏳</div><div class="title">SUBMITTED 已提交</div></div>
+<div class="arrow-step">→ 审核通过 →</div>
+<div class="step" style="background:#e8f5e9;border:2px solid #388e3c"><div class="icon">✅</div><div class="title">REVIEWED 已审核</div></div>
+<div class="arrow-step">→ 接收 →</div>
+<div class="step" style="background:#c8e6c9;border:2px solid #2e7d32"><div class="icon">🏁</div><div class="title">ACCEPTED 已接收</div></div>
+</div>
+<div style="text-align:center;margin:8px 0">
+<span style="display:inline-block;padding:4px 16px;background:#ffebee;border-radius:20px;font-size:13px;color:#c62828">驳回 REJECTED → 回到 DRAFT 可重新提交</span>
+</div>
+<div style="margin-top:12px"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#37474f;color:#fff"><th style="padding:8px">业务类型</th><th style="padding:8px">默认审批链</th><th style="padding:8px">条件分支</th></tr></thead>
+<tbody>
+<tr><td style="padding:8px;border-bottom:1px solid #e0e0e0">资产调拨</td><td style="padding:8px;border-bottom:1px solid #e0e0e0">调入部门确认</td><td style="padding:8px;border-bottom:1px solid #e0e0e0">—</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #e0e0e0;background:#fafafa">资产报废</td><td style="padding:8px;border-bottom:1px solid #e0e0e0;background:#fafafa">部门负责人 → 财务审核</td><td style="padding:8px;border-bottom:1px solid #e0e0e0;background:#fafafa">原值>10万：追加分管领导</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #e0e0e0">盘点差异</td><td style="padding:8px;border-bottom:1px solid #e0e0e0">差异确认 → 财务调整</td><td style="padding:8px;border-bottom:1px solid #e0e0e0">—</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #e0e0e0;background:#fafafa">采购申请</td><td style="padding:8px;border-bottom:1px solid #e0e0e0;background:#fafafa">部门负责人 → 管理层</td><td style="padding:8px;border-bottom:1px solid #e0e0e0;background:#fafafa">金额>5万：追加财务审核</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #e0e0e0">维保维修</td><td style="padding:8px;border-bottom:1px solid #e0e0e0">申请 → 部门确认</td><td style="padding:8px;border-bottom:1px solid #e0e0e0">—</td></tr>
+<tr><td style="padding:8px;background:#fafafa">监管上报</td><td style="padding:8px;background:#fafafa">企业提交 → 集团审核 → 国资委接收</td><td style="padding:8px;background:#fafafa">—</td></tr>
+</tbody></table></div></div>
+</body></html>

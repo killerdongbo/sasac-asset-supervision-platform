@@ -1,0 +1,10 @@
+node_modules/
+server/target/
+*.iml
+.idea/
+.vscode/
+*.log
+.env
+application-dev.yml
+application-local.yml
+.superpowers/

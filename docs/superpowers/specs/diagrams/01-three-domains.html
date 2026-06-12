@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',sans-serif;background:#f0f2f5;padding:40px}
+h1{text-align:center;color:#1a237e;margin-bottom:30px;font-size:28px}
+.domains{display:flex;flex-direction:column;gap:24px;max-width:1100px;margin:0 auto}
+.domain{border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.domain-header{padding:16px 24px;font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:12px}
+.domain-enterprise .domain-header{background:linear-gradient(135deg,#1565c0,#1976d2)}
+.domain-supervision .domain-header{background:linear-gradient(135deg,#e65100,#f57c00)}
+.domain-platform .domain-header{background:linear-gradient(135deg,#2e7d32,#43a047)}
+.domain-body{background:#fff;padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.module-card{border-radius:10px;padding:16px;border:2px solid #e0e0e0;transition:transform .2s}
+.module-card:hover{transform:translateY(-2px)}
+.module-card h4{font-size:15px;margin-bottom:6px}
+.module-card .count{font-size:12px;color:#999}
+.domain-enterprise .module-card{border-left:4px solid #1976d2;background:#e3f2fd}
+.domain-supervision .module-card{border-left:4px solid #f57c00;background:#fff3e0}
+.domain-platform .module-card{border-left:4px solid #43a047;background:#e8f5e9}
+.domain-footer{background:#fafafa;padding:12px 24px;text-align:right;font-size:14px;color:#666;font-weight:600}
+</style></head><body>
+<h1>🏛️ 系统三域架构全景图</h1>
+<div class="domains">
+<div class="domain domain-enterprise"><div class="domain-header">🏢 企业资产管理域</div>
+<div class="domain-body">
+<div class="module-card"><h4>📋 资产基础资料</h4><div class="count">4 功能</div></div>
+<div class="module-card"><h4>📦 资产台账管理</h4><div class="count">7 功能</div></div>
+<div class="module-card"><h4>🔄 资产流转管理</h4><div class="count">5 功能</div></div>
+<div class="module-card"><h4>🛒 采购管理</h4><div class="count">3 功能</div></div>
+<div class="module-card"><h4>🔍 巡检管理</h4><div class="count">5 功能</div></div>
+<div class="module-card"><h4>📊 盘点管理</h4><div class="count">6 功能</div></div>
+<div class="module-card"><h4>🔧 维保维修管理</h4><div class="count">3 功能</div></div>
+<div class="module-card"><h4>💰 财务折旧管理</h4><div class="count">3 功能</div></div>
+</div><div class="domain-footer">小计：8 模块 · 36 功能</div></div>
+<div class="domain domain-supervision"><div class="domain-header">🏛 国资监管域</div>
+<div class="domain-body">
+<div class="module-card"><h4>📈 工作台</h4><div class="count">3 功能</div></div>
+<div class="module-card"><h4>📊 统计报表</h4><div class="count">3 功能</div></div>
+<div class="module-card"><h4>📤 监管上报</h4><div class="count">新增</div></div>
+<div class="module-card"><h4>✅ 审批工作流</h4><div class="count">3 功能</div></div>
+<div class="module-card"><h4>⚠️ 预警中心</h4><div class="count">4 功能</div></div>
+<div class="module-card"><h4>🔎 审计追溯</h4><div class="count">2 功能</div></div>
+<div class="module-card"><h4>🔗 财务对接</h4><div class="count">新增</div></div>
+<div class="module-card" style="background:#fff;border:1px dashed #ccc"><h4 style="color:#999">（预留扩展）</h4></div>
+</div><div class="domain-footer">小计：7 模块 · 15+ 功能</div></div>
+<div class="domain domain-platform"><div class="domain-header">⚙️ 平台基础域</div>
+<div class="domain-body">
+<div class="module-card"><h4>🔐 系统入口与安全</h4><div class="count">3 功能</div></div>
+<div class="module-card"><h4>👥 组织权限管理</h4><div class="count">4 功能</div></div>
+<div class="module-card"><h4>📥 数据导入导出</h4><div class="count">2 功能</div></div>
+</div><div class="domain-footer">小计：3 模块 · 9 功能 · 横切关注点</div></div>
+</div></body></html>

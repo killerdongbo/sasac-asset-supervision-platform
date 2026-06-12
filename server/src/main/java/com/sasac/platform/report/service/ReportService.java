@@ -1,0 +1,177 @@
+package com.sasac.platform.report.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sasac.platform.asset.entity.Asset;
+import com.sasac.platform.asset.mapper.AssetMapper;
+import com.sasac.platform.common.exception.BusinessException;
+import com.sasac.platform.report.entity.Report;
+import com.sasac.platform.report.mapper.ReportMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Service for report generation and retrieval.
+ * <p>
+ * Aggregates asset data into JSON snapshot reports, supporting
+ * the reporting lifecycle from DRAFT through REVIEWED/ACCEPTED.
+ */
+@Service
+@RequiredArgsConstructor
+public class ReportService {
+
+    private final ReportMapper reportMapper;
+    private final AssetMapper assetMapper;
+    private final ObjectMapper objectMapper;
+
+    /**
+     * Generates a new report by aggregating asset data into a JSON snapshot.
+     *
+     * @param reportType the type of report (e.g., ASSET_SUMMARY)
+     * @param orgId      the organization ID to report on
+     * @param period     the reporting period (e.g., 2025-Q1)
+     * @param tenantId   the tenant ID
+     * @return the created Report entity with DRAFT status
+     */
+    @Transactional
+    public Report generate(String reportType, Long orgId, String period, Long tenantId) {
+        Map<String, Object> data = buildReportData(reportType, orgId);
+        try {
+            String snapshotJson = objectMapper.writeValueAsString(data);
+
+            Report report = new Report();
+            report.setReportType(reportType);
+            report.setPeriod(period);
+            report.setOrgId(orgId);
+            report.setTenantId(tenantId);
+            report.setSubmitStatus("DRAFT");
+            report.setVersion(1);
+            report.setSnapshotData(snapshotJson);
+
+            reportMapper.insert(report);
+            return report;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize report data", e);
+        }
+    }
+
+    /**
+     * Retrieves and parses the report data from its JSON snapshot.
+     *
+     * @param reportId the report ID
+     * @return the parsed report data as a Map
+     */
+    public Map<String, Object> getReportData(Long reportId) {
+        Report report = reportMapper.selectById(reportId);
+        if (report == null || report.getSnapshotData() == null) {
+            return Collections.emptyMap();
+        }
+        try {
+            return objectMapper.readValue(report.getSnapshotData(), new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse report data", e);
+        }
+    }
+
+    /**
+     * Retrieves a report entity by ID.
+     *
+     * @param id the report ID
+     * @return the Report entity
+     * @throws BusinessException if the report is not found
+     */
+    public Report getById(Long id) {
+        Report report = reportMapper.selectById(id);
+        if (report == null) {
+            throw new BusinessException("报告不存在");
+        }
+        return report;
+    }
+
+    /**
+     * Lists reports for a given organization, ordered by creation time descending.
+     *
+     * @param orgId the organization ID
+     * @return list of reports
+     */
+    public List<Report> listByOrg(Long orgId) {
+        LambdaQueryWrapper<Report> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Report::getOrgId, orgId);
+        wrapper.orderByDesc(Report::getCreatedAt)
+                .orderByDesc(Report::getId);
+        return reportMapper.selectList(wrapper);
+    }
+
+    /**
+     * Builds the aggregated report data from asset records.
+     *
+     * @param reportType the type of report
+     * @param orgId      the organization ID
+     * @return a Map containing aggregated report data
+     */
+    private Map<String, Object> buildReportData(String reportType, Long orgId) {
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Asset::getOrgId, orgId);
+
+        List<Asset> assets = assetMapper.selectList(wrapper);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("reportType", reportType);
+        data.put("orgId", orgId);
+        data.put("generatedAt", LocalDateTime.now().toString());
+
+        // Total asset count
+        data.put("totalAssets", assets.size());
+
+        // Financial aggregates
+        BigDecimal totalOriginalValue = assets.stream()
+                .map(a -> a.getOriginalValue() != null ? a.getOriginalValue() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        data.put("totalOriginalValue", totalOriginalValue);
+
+        BigDecimal totalCurrentValue = assets.stream()
+                .map(a -> a.getCurrentValue() != null ? a.getCurrentValue() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        data.put("totalCurrentValue", totalCurrentValue);
+
+        BigDecimal totalAccumulatedDepreciation = assets.stream()
+                .map(a -> a.getAccumulatedDepreciation() != null ? a.getAccumulatedDepreciation() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        data.put("totalAccumulatedDepreciation", totalAccumulatedDepreciation);
+
+        // Category summary: group by category, count
+        Map<String, Long> categoryCount = assets.stream()
+                .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
+        List<Map<String, Object>> categorySummary = categoryCount.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("category", entry.getKey());
+                    item.put("count", entry.getValue());
+                    return item;
+                })
+                .collect(Collectors.toList());
+        data.put("categorySummary", categorySummary);
+
+        // Status summary: group by useStatus, count
+        Map<String, Long> statusCount = assets.stream()
+                .collect(Collectors.groupingBy(Asset::getUseStatus, Collectors.counting()));
+        List<Map<String, Object>> statusSummary = statusCount.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("status", entry.getKey());
+                    item.put("count", entry.getValue());
+                    return item;
+                })
+                .collect(Collectors.toList());
+        data.put("statusSummary", statusSummary);
+
+        return data;
+    }
+}

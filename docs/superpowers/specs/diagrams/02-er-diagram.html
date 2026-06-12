@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',sans-serif;background:#f8f9fa;padding:30px}
+h1{text-align:center;color:#1a237e;margin-bottom:10px;font-size:24px}
+.subtitle{text-align:center;color:#666;margin-bottom:30px;font-size:14px}
+.er{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:1200px;margin:0 auto}
+.entity{background:#fff;border-radius:12px;padding:14px 28px;box-shadow:0 3px 12px rgba(0,0,0,.1);text-align:center;min-width:200px}
+.entity.org{border:3px solid #e91e63;background:#fce4ec}
+.entity.asset{border:3px solid #ff9800;background:#fff3e0}
+.entity.sub{border:3px solid #2196f3;background:#e3f2fd}
+.entity.other{border:3px solid #4caf50;background:#e8f5e9}
+.entity h4{font-size:15px;color:#333}
+.entity .fields{font-size:11px;color:#888;margin-top:4px}
+.arrow{color:#999;font-size:20px;font-weight:700}
+.connector{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center}
+.connector-line{color:#666;font-size:13px;padding:4px 12px;background:#fff;border-radius:20px;border:1px dashed #ccc}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.legend{display:flex;gap:20px;justify-content:center;margin:20px 0;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:13px}
+.legend-dot{width:14px;height:14px;border-radius:4px}
+</style></head><body>
+<h1>📦 核心实体关系图 (ER Diagram)</h1>
+<p class="subtitle">企业资产管理域、国资监管域、平台基础域核心实体及关系</p>
+<div class="legend">
+<div class="legend-item"><div class="legend-dot" style="background:#e91e63"></div>平台基础域</div>
+<div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div>企业资产域核心</div>
+<div class="legend-item"><div class="legend-dot" style="background:#2196f3"></div>企业资产域子实体</div>
+<div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div>国资监管域</div>
+</div>
+<div class="er">
+<div class="entity org"><h4>🏢 Organization 组织架构</h4><div class="fields">parent_id · name · org_type · tenant_id</div></div>
+<div class="arrow">⬇ 1 : N</div>
+<div class="entity asset"><h4>📦 Asset 资产台账（核心）</h4><div class="fields">name · asset_code · category · org_id · original_value · current_value · use_status</div></div>
+<div class="arrow">⬇ 1 : N 展开子实体</div>
+<div class="row">
+<div class="entity sub"><h4>📝 AssetChangeLog</h4><div class="fields">变更记录</div></div>
+<div class="entity sub"><h4>🔄 Transfer/Disposal</h4><div class="fields">调拨·报废</div></div>
+<div class="entity sub"><h4>🔍 InspectionRecord</h4><div class="fields">巡检记录</div></div>
+<div class="entity sub"><h4>📊 InventoryRecord</h4><div class="fields">盘点记录</div></div>
+<div class="entity sub"><h4>🔧 MaintenanceReq</h4><div class="fields">维保申请</div></div>
+<div class="entity sub"><h4>💰 DepreciationRecord</h4><div class="fields">折旧记录</div></div>
+<div class="entity sub"><h4>🛒 PurchaseReq</h4><div class="fields">采购申请</div></div>
+</div>
+<div class="arrow" style="margin-top:12px">⬆ N : 1 关联监管域</div>
+<div class="row">
+<div class="entity other"><h4>✅ ApprovalInstance</h4><div class="fields">审批实例 · 跨域共用</div></div>
+<div class="entity other"><h4>📤 ReportSnapshot</h4><div class="fields">报表快照 · 监管上报</div></div>
+<div class="entity other"><h4>⚠️ AlertRecord</h4><div class="fields">预警记录 · 自动检测</div></div>
+<div class="entity other"><h4>📋 OperationLog</h4><div class="fields">操作日志 · 全模块埋点</div></div>
+<div class="entity other"><h4>🔗 FinancialData</h4><div class="fields">财务对接 · 数据缓存</div></div>
+</div>
+</div></body></html>

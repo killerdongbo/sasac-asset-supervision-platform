@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',sans-serif;background:#fff;padding:30px}
+h1{text-align:center;color:#1a237e;margin-bottom:8px;font-size:24px}
+.subtitle{text-align:center;color:#666;margin-bottom:25px;font-size:14px}
+.phase{border-radius:12px;margin-bottom:24px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.phase-header{padding:14px 24px;font-weight:700;font-size:18px;color:#fff}
+.phase1 .phase-header{background:linear-gradient(135deg,#1565c0,#42a5f5)}
+.phase2 .phase-header{background:linear-gradient(135deg,#e65100,#ff9800)}
+.phase-body{background:#fafafa;padding:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#37474f;color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+th:first-child{border-radius:6px 0 0 0}
+th:last-child{border-radius:0 6px 0 0}
+td{padding:8px 10px;border-bottom:1px solid #e0e0e0;background:#fff}
+.sprint-bar{display:flex;gap:3px;margin-top:12px}
+.sprint-cell{flex:1;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.dev{background:#2196f3}
+.iter{background:#ab47bc}
+.legend-row{display:flex;gap:20px;justify-content:center;margin:20px 0}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:13px}
+.legend-dot{width:16px;height:16px;border-radius:3px}
+</style></head><body>
+<h1>📅 分阶段交付路线图（14周）</h1>
+<p class="subtitle">Phase 1（7月底）：资产入账完整链路 &nbsp;|&nbsp; Phase 2（8-9月）：现场管理 + 监管协同</p>
+<div class="legend-row">
+<div class="legend-item"><div class="legend-dot" style="background:#2196f3"></div>主开发阶段</div>
+<div class="legend-item"><div class="legend-dot" style="background:#ab47bc"></div>持续迭代</div>
+</div>
+<div class="phase phase1">
+<div class="phase-header">🎯 Phase 1：资产入账完整链路（Sprint 0-3，7周）</div>
+<div class="phase-body">
+<table><thead><tr><th>模块</th><th style="text-align:center">S0<br>第1周</th><th style="text-align:center">S1<br>第2-3周</th><th style="text-align:center">S2<br>第4-5周</th><th style="text-align:center">S3<br>第6-7周</th></tr></thead>
+<tbody>
+<tr><td>🔐 系统入口与安全</td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td><td></td></tr>
+<tr><td>👥 组织权限管理</td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td><td></td></tr>
+<tr><td>📋 资产基础资料</td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td></tr>
+<tr><td>📦 资产台账管理</td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td style="text-align:center"><span class="sprint-cell iter" style="display:inline-block;width:50px">◐</span></td><td></td></tr>
+<tr><td>🔄 资产流转管理</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td></tr>
+<tr><td>🛒 采购管理</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td></tr>
+<tr><td>💰 财务折旧管理</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td></tr>
+<tr><td>✅ 审批工作流</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell iter" style="display:inline-block;width:50px">◐</span></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td></tr>
+<tr><td>📈 工作台/驾驶舱</td><td></td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td></tr>
+<tr><td>📊 统计报表</td><td></td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td></tr>
+<tr><td>📥 数据导入导出</td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td style="text-align:center"><span class="sprint-cell iter" style="display:inline-block;width:50px">◐</span></td><td></td></tr>
+</tbody></table>
+<div style="margin-top:12px;padding:10px 14px;background:#e3f2fd;border-radius:8px;font-size:13px;color:#1565c0">
+🎯 验收标准：企业可完成 采购申请→资产入账→日常使用→折旧计提→报废退出 的完整闭环，驾驶舱展示资产全貌
+</div></div></div>
+<div class="phase phase2">
+<div class="phase-header">🎯 Phase 2：现场管理 + 监管协同（Sprint 4-7，7周）</div>
+<div class="phase-body">
+<table><thead><tr><th>模块</th><th style="text-align:center">S4<br>第8-9周</th><th style="text-align:center">S5<br>第10-11周</th><th style="text-align:center">S6<br>第12-13周</th><th style="text-align:center">S7<br>第14周</th></tr></thead>
+<tbody>
+<tr><td>🔍 巡检管理</td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td><td></td></tr>
+<tr><td>🔧 维保维修管理</td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td><td></td></tr>
+<tr><td>📊 盘点管理</td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td></tr>
+<tr><td>⚠️ 预警中心</td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td><td></td></tr>
+<tr><td>📤 监管上报</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td></tr>
+<tr><td>🔎 审计追溯</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td></tr>
+<tr><td>🔗 财务对接</td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td><td></td></tr>
+<tr><td>✅ 审批工作流</td><td style="text-align:center"><span class="sprint-cell iter" style="display:inline-block;width:50px">◐</span></td><td style="text-align:center"><span class="sprint-cell iter" style="display:inline-block;width:50px">◐</span></td><td style="text-align:center"><span class="sprint-cell iter" style="display:inline-block;width:50px">◐</span></td><td></td></tr>
+<tr><td>🧪 集成测试 + 上线</td><td></td><td></td><td></td><td style="text-align:center"><span class="sprint-cell dev" style="display:inline-block;width:50px">●</span></td></tr>
+</tbody></table>
+<div style="margin-top:12px;padding:10px 14px;background:#fff3e0;border-radius:8px;font-size:13px;color:#e65100">
+🎯 验收标准：企业可完成巡检盘点现场管理，数据可通过审批上报至国资委，系统具备完整的审计追溯能力
+</div></div></div></body></html>
