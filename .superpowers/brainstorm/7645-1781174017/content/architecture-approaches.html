@@ -1,0 +1,125 @@
+<h2>功能模块组织 — 三种架构思路对比</h2>
+<p class="subtitle">已确认的关键决策：全生命周期 · 混合数据采集 · 灵活多级组织 · 上报-确认模式 · 财务深层对接 · SaaS多租户 · 7月MVP试点使用</p>
+
+<div class="section">
+  <h3>方案 A：资产中心模式</h3>
+  <p>以"资产主数据中心"为唯一数据源，所有功能围绕资产台账运转</p>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+    <div style="text-align: center; padding: 0.8rem; background: var(--accent); color: white; border-radius: 8px; margin-bottom: 0.8rem; font-weight: 700;">
+      🏛️ 资产主数据中心（固定资产台账）
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+      <div style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; text-align: center;">登记/验收</div>
+      <div style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; text-align: center;">变动/调拨</div>
+      <div style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; text-align: center;">折旧/摊销</div>
+      <div style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; text-align: center;">处置/报废</div>
+      <div style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; text-align: center;">报表/上报</div>
+      <div style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; text-align: center;">驾驶舱/BI</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros"><h4>✅ 优势</h4><ul>
+    <li>数据一致性强，单一可信源</li>
+    <li>开发路径直截了当，报表和驾驶舱直接从台账出</li>
+    <li>适合以固定资产为核心聚焦的二期策略</li>
+  </ul></div>
+  <div class="cons"><h4>⚠️ 风险</h4><ul>
+    <li>非资产类数据（财务科目余额、合并报表校验）难以纳入</li>
+    <li>当后续扩展到债权、投资等资产类型时，模型可能需大幅改造</li>
+  </ul></div>
+</div>
+
+<hr style="margin: 2rem 0; border-color: var(--border);">
+
+<div class="section">
+  <h3>方案 B：业务流程模式</h3>
+  <p>按业务场景组织独立模块，每个模块自含数据、逻辑和界面</p>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+      <div style="padding: 0.8rem; border: 2px solid var(--accent); border-radius: 8px; text-align: center; font-weight: 600;">📋 资产登记</div>
+      <div style="padding: 0.8rem; border: 2px solid var(--accent); border-radius: 8px; text-align: center; font-weight: 600;">🔄 变动管理</div>
+      <div style="padding: 0.8rem; border: 2px solid var(--accent); border-radius: 8px; text-align: center; font-weight: 600;">📉 折旧计提</div>
+      <div style="padding: 0.8rem; border: 2px solid var(--accent); border-radius: 8px; text-align: center; font-weight: 600;">🗑️ 资产处置</div>
+      <div style="padding: 0.8rem; border: 2px solid var(--accent); border-radius: 8px; text-align: center; font-weight: 600;">📊 报表上报</div>
+      <div style="padding: 0.8rem; border: 2px solid var(--accent); border-radius: 8px; text-align: center; font-weight: 600;">📡 驾驶舱</div>
+    </div>
+    <div style="text-align: center; padding: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+      ⬆ 模块间通过集成层通信 ⬆
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros"><h4>✅ 优势</h4><ul>
+    <li>贴近用户实际业务操作习惯</li>
+    <li>模块可独立开发、独立上线</li>
+    <li>新增业务场景时容易扩展</li>
+  </ul></div>
+  <div class="cons"><h4>⚠️ 风险</h4><ul>
+    <li>模块间容易形成数据孤岛</li>
+    <li>跨模块一致性（如资产状态同步）需要额外保障机制</li>
+    <li>报表和驾驶舱需要从多个模块聚合数据</li>
+  </ul></div>
+</div>
+
+<hr style="margin: 2rem 0; border-color: var(--border);">
+
+<div class="section">
+  <h3>方案 C：分层架构模式 ⭐ 推荐</h3>
+  <p>数据层 → 业务服务层 → 应用层三层分离，通过统一资产服务总线串联</p>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+    <div style="text-align: center; padding: 0.6rem; background: #e8f5e9; border-radius: 6px; margin-bottom: 0.5rem; font-weight: 600;">
+      🖥️ 应用层：企业门户 · 国资委驾驶舱 · 报表中心
+    </div>
+    <div style="text-align: center; padding: 0.2rem; font-size: 1.2rem;">⬇</div>
+    <div style="text-align: center; padding: 0.6rem; background: #e3f2fd; border-radius: 6px; margin-bottom: 0.5rem; font-weight: 600;">
+      ⚙️ 业务服务层：资产登记 · 变动管理 · 折旧 · 处置 · 报表引擎 · 上报流程 · 财务对接
+    </div>
+    <div style="text-align: center; padding: 0.2rem; font-size: 1.2rem;">⬇</div>
+    <div style="text-align: center; padding: 0.6rem; background: #fff3e0; border-radius: 6px; margin-bottom: 0.5rem; font-weight: 600;">
+      💾 数据层：资产台账 · 组织架构 · 财务数据 · 报表数据 · 配置字典
+    </div>
+    <div style="text-align: center; padding: 0.5rem; margin-top: 0.5rem; border: 1px dashed var(--accent); border-radius: 6px;">
+      ↔ 统一资产服务总线（API Gateway / 事件总线）↔
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros"><h4>✅ 优势</h4><ul>
+    <li>数据层统一，兼顾方案A的一致性优势</li>
+    <li>业务层独立，兼顾方案B的灵活扩展</li>
+    <li>应用层可按角色（企业/集团/国资委）分别定制，互不影响</li>
+    <li>后续扩展新资产类型（债权、投资等）只需扩展数据模型+注册服务</li>
+    <li>SaaS多租户下，数据隔离在数据层统一处理</li>
+  </ul></div>
+  <div class="cons"><h4>⚠️ 风险</h4><ul>
+    <li>初期设计工作量多于A和B</li>
+    <li>如团队经验不足，分层可能过度设计</li>
+    <li>需要在MVP时间压力下控制每层的复杂度</li>
+  </ul></div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>🏆 推荐结论</h3>
+  <p>推荐 <strong>方案C：分层架构</strong>，但MVP阶段采用<strong>精简分层</strong>策略：</p>
+  <ul>
+    <li><strong>数据层</strong>：只建资产台账 + 组织架构 + 报表数据三张核心模型</li>
+    <li><strong>业务层</strong>：先实现登记、变动、折旧、处置、上报5个服务</li>
+    <li><strong>应用层</strong>：企业端一个门户，国资委端一个驾驶舱</li>
+    <li>服务总线用简约的REST API Gateway，不引入复杂的消息中间件</li>
+  </ul>
+  <p style="margin-top: 1rem;">这既保持了分层架构的长期扩展能力，又不会在7月MVP压力下过度设计。</p>
+</div>

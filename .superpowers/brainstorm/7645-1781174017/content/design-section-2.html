@@ -1,0 +1,132 @@
+<h2>设计第二节：核心业务流程</h2>
+<p class="subtitle">全生命周期 · 上报-确认模式 · 财务对接</p>
+
+<div class="section">
+  <h3>🔄 流程一：固定资产全生命周期</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; justify-content: center; font-size: 0.82rem;">
+      <div style="padding: 0.5rem 0.7rem; border: 2px solid #4caf50; border-radius: 8px; text-align: center; background: #e8f5e9;">
+        📥<br>资产新增<br><span style="font-size:0.65rem;color:#666;">采购验收·划转入库<br>建卡登记</span>
+      </div>
+      <span style="font-size:1.2rem; color:#888;">→</span>
+      <div style="padding: 0.5rem 0.7rem; border: 2px solid #2196f3; border-radius: 8px; text-align: center; background: #e3f2fd;">
+        🔧<br>使用管理<br><span style="font-size:0.65rem;color:#666;">领用·维修·盘点<br>闲置标记</span>
+      </div>
+      <span style="font-size:1.2rem; color:#888;">→</span>
+      <div style="padding: 0.5rem 0.7rem; border: 2px solid #ff9800; border-radius: 8px; text-align: center; background: #fff3e0;">
+        🔄<br>变动流转<br><span style="font-size:0.65rem;color:#666;">调拨·转让·抵押<br>出租·出借</span>
+      </div>
+      <span style="font-size:1.2rem; color:#888;">→</span>
+      <div style="padding: 0.5rem 0.7rem; border: 2px solid #9c27b0; border-radius: 8px; text-align: center; background: #f3e5f5;">
+        📉<br>折旧摊销<br><span style="font-size:0.65rem;color:#666;">月折旧计提<br>累计折旧</span>
+      </div>
+      <span style="font-size:1.2rem; color:#888;">→</span>
+      <div style="padding: 0.5rem 0.7rem; border: 2px solid #f44336; border-radius: 8px; text-align: center; background: #ffebee;">
+        🗑️<br>资产处置<br><span style="font-size:0.65rem;color:#666;">报废·出售·核销<br>处置收益</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 1rem; padding: 0.6rem; background: #fafafa; border-radius: 6px; border: 1px dashed #ddd; font-size: 0.8rem;">
+      <strong>🔍 追溯审计：</strong>每个资产拥有完整操作日志和变更历史链，从新增到处置全程可追溯，支撑国资审计要求。
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>📤 流程二：数据上报-确认模式</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+
+    <div style="display: flex; gap: 0.4rem; margin-bottom: 0.8rem;">
+      <div style="flex:1; text-align: center; padding: 0.3rem; font-weight: 700; font-size: 0.8rem; color: #1976d2;">阶段1</div>
+      <div style="flex:1; text-align: center; padding: 0.3rem; font-weight: 700; font-size: 0.8rem; color: #1976d2;">阶段2</div>
+      <div style="flex:1; text-align: center; padding: 0.3rem; font-weight: 700; font-size: 0.8rem; color: #1976d2;">阶段3</div>
+      <div style="flex:1; text-align: center; padding: 0.3rem; font-weight: 700; font-size: 0.8rem; color: #1976d2;">阶段4</div>
+    </div>
+
+    <div style="display: flex; gap: 0.4rem;">
+      <div style="flex:1; padding: 0.6rem 0.4rem; border: 2px solid #4caf50; border-radius: 8px; background: #e8f5e9; text-align: center; font-size: 0.78rem;">
+        <strong>📝 企业填报</strong><br>
+        <span style="font-size:0.65rem;color:#666;">系统自动汇总资产数据<br>企业补充校验<br>数据确认无误后提交</span>
+        <div style="margin-top:0.3rem; padding:0.2rem; background:#c8e6c9; border-radius:3px; font-size:0.65rem;">企业可控缓冲空间<br>提交前自由修改</div>
+      </div>
+      <div style="flex:1; padding: 0.6rem 0.4rem; border: 2px solid #2196f3; border-radius: 8px; background: #e3f2fd; text-align: center; font-size: 0.78rem;">
+        <strong>👥 集团审核</strong><br>
+        <span style="font-size:0.65rem;color:#666;">审核下属企业数据<br>可驳回修正<br>汇总生成集团报表</span>
+        <div style="margin-top:0.3rem; padding:0.2rem; background:#bbdefb; border-radius:3px; font-size:0.65rem;">集团汇总审核<br>穿透查看明细</div>
+      </div>
+      <div style="flex:1; padding: 0.6rem 0.4rem; border: 2px solid #ff9800; border-radius: 8px; background: #fff3e0; text-align: center; font-size: 0.78rem;">
+        <strong>📊 国资委接收</strong><br>
+        <span style="font-size:0.65rem;color:#666;">数据进入监管库<br>自动校验比对<br>生成监管报表</span>
+        <div style="margin-top:0.3rem; padding:0.2rem; background:#ffe0b2; border-radius:3px; font-size:0.65rem;">上报后锁定<br>变更需走变更流程</div>
+      </div>
+      <div style="flex:1; padding: 0.6rem 0.4rem; border: 2px solid #9c27b0; border-radius: 8px; background: #f3e5f5; text-align: center; font-size: 0.78rem;">
+        <strong>📡 省平台对接</strong><br>
+        <span style="font-size:0.65rem;color:#666;">按省数据标准转换<br>定期自动上报<br>接收反馈</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons" style="margin-top: 1rem;">
+  <div class="pros"><h4>✅ 关键保护机制</h4><ul>
+    <li><strong>缓冲空间：</strong>企业提交前数据仅自己可见，可反复修改</li>
+    <li><strong>版本管理：</strong>每次上报生成快照版本，历史可查可对比</li>
+    <li><strong>驳回重报：</strong>集团/国资委可驳回，企业修正后重新提交</li>
+    <li><strong>变更流程：</strong>已上报数据如需修正，走变更申请→审批→更新流程</li>
+  </ul></div>
+  <div class="cons"><h4>⚠️ 需注意</h4><ul>
+    <li>需定义每个报表类型的报送周期（月/季/年）和截止日期</li>
+    <li>驳回机制可能被滥用拖延 — 需要超时自动通过策略</li>
+    <li>多版本快照长期存储需要数据归档策略</li>
+  </ul></div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>🔗 流程三：财务系统对接</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+    <div style="display: flex; gap: 0.5rem; align-items: stretch;">
+      <div style="flex:1; padding: 0.6rem; border: 2px solid #4caf50; border-radius: 8px; background: white;">
+        <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem;">🏢 企业财务系统</div>
+        <div style="font-size: 0.75rem; color: #666;">用友 · 金蝶 · SAP · 其他</div>
+        <div style="margin-top: 0.5rem; font-size: 0.7rem; border-top: 1px solid #eee; padding-top: 0.3rem;">
+          <div>◆ 固定资产卡片/台账</div>
+          <div>◆ 科目余额表</div>
+          <div>◆ 单体财务报表</div>
+        </div>
+      </div>
+      <div style="flex:1; padding: 0.6rem; border: 2px solid #2196f3; border-radius: 8px; background: #e3f2fd;">
+        <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem;">🔌 财务适配器层</div>
+        <div style="font-size: 0.75rem; color: #666;">标准化适配 · 协议转换</div>
+        <div style="margin-top: 0.5rem; font-size: 0.7rem; border-top: 1px solid #bbdefb; padding-top: 0.3rem;">
+          <div>◆ 标准API适配（主流财务系统）</div>
+          <div>◆ 数据库直连（授权模式）</div>
+          <div>◆ Excel模板导入（兜底方案）</div>
+        </div>
+      </div>
+      <div style="flex:1; padding: 0.6rem; border: 2px solid #ff9800; border-radius: 8px; background: #fff3e0;">
+        <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem;">✅ 数据校验引擎</div>
+        <div style="font-size: 0.75rem; color: #666;">清洗 · 校验 · 映射</div>
+        <div style="margin-top: 0.5rem; font-size: 0.7rem; border-top: 1px solid #ffe0b2; padding-top: 0.3rem;">
+          <div>◆ 资产分类映射</div>
+          <div>◆ 合并报表冲抵校验</div>
+          <div>◆ 数据完整性检查</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 0.8rem; padding: 0.6rem; background: #fafafa; border-radius: 6px; border: 1px dashed #ddd; font-size: 0.8rem;">
+      <strong>💡 关键处理逻辑 — 合并报表"水分"问题：</strong><br>
+      不从企业直接拿合并报表数据，而是<strong>拉取底层单体报表数据</strong> + 内部交易/往来标记，
+      在平台侧做合并校验和抵销计算，识别并标记合并报表中的异常偏差。
+    </div>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<h2>设计第三节：技术选型 &amp; 部署架构</h2>
+<p class="subtitle">SaaS多租户 · 信创兼容 · 7月MVP交付</p>
+
+<div class="section">
+  <h3>🧱 技术栈建议</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Java/SpringBoot 全栈</h3>
+      <p>后端 SpringBoot 3 + MyBatis-Plus + PostgreSQL；前端 Vue3 + Element Plus；信创生态最成熟，政务项目标准选择</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Go 轻量架构</h3>
+      <p>后端 Go + Gin + GORM + PostgreSQL；前端 Vue3；性能优秀、部署简单、资源占用低</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>混合技术栈</h3>
+      <p>核心业务 Java（信创合规） + 数据服务 Go（高性能） + 前端 Vue3；各自发挥优势，但运维复杂度增加</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>📋 推荐方案A详细技术选型</h3>
+  <table style="width:100%; border-collapse: collapse;">
+    <tr style="background: #f8f8f8;"><td style="padding: 0.6rem; font-weight: 700; width: 25%;">层次</td><td style="padding: 0.6rem; font-weight: 700;">技术选型</td><td style="padding: 0.6rem; font-weight: 700;">选型理由</td></tr>
+    <tr><td style="padding: 0.6rem; font-weight: 600;">前端框架</td><td style="padding: 0.6rem;">Vue 3 + TypeScript + Element Plus</td><td style="padding: 0.6rem; font-size: 0.8rem;">政务项目主流选型，组件库成熟，团队招聘容易</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.6rem; font-weight: 600;">可视化/驾驶舱</td><td style="padding: 0.6rem;">ECharts 5 + DataV</td><td style="padding: 0.6rem; font-size: 0.8rem;">国产可视化库，大屏适配成熟，信创兼容</td></tr>
+    <tr><td style="padding: 0.6rem; font-weight: 600;">后端框架</td><td style="padding: 0.6rem;">Spring Boot 3.x + MyBatis-Plus</td><td style="padding: 0.6rem; font-size: 0.8rem;">政务信创标配，生态最完善</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.6rem; font-weight: 600;">数据库</td><td style="padding: 0.6rem;">PostgreSQL 15 + PostGIS（空间数据扩展）</td><td style="padding: 0.6rem; font-size: 0.8rem;">开源、信创兼容，PostGIS支持土地/房产空间数据</td></tr>
+    <tr><td style="padding: 0.6rem; font-weight: 600;">缓存</td><td style="padding: 0.6rem;">Redis 7</td><td style="padding: 0.6rem; font-size: 0.8rem;">Session共享、租户配置缓存、驾驶舱数据预热</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.6rem; font-weight: 600;">文件存储</td><td style="padding: 0.6rem;">MinIO（对象存储）</td><td style="padding: 0.6rem; font-size: 0.8rem;">资产照片、附件、报表导出文件，兼容S3协议</td></tr>
+    <tr><td style="padding: 0.6rem; font-weight: 600;">报表引擎</td><td style="padding: 0.6rem;">JasperReports + Apache POI</td><td style="padding: 0.6rem; font-size: 0.8rem;">复杂报表模板（19类）+ Excel导入导出</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.6rem; font-weight: 600;">消息队列</td><td style="padding: 0.6rem;">RabbitMQ（MVP可选，后续引入）</td><td style="padding: 0.6rem; font-size: 0.8rem;">异步任务：折旧批量计提、报表生成、数据同步</td></tr>
+    <tr><td style="padding: 0.6rem; font-weight: 600;">API网关</td><td style="padding: 0.6rem;">Spring Cloud Gateway</td><td style="padding: 0.6rem; font-size: 0.8rem;">统一鉴权、租户注入、限流、日志</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.6rem; font-weight: 600;">容器化</td><td style="padding: 0.6rem;">Docker + Docker Compose（MVP）</td><td style="padding: 0.6rem; font-size: 0.8rem;">MVP阶段够用，后续可升级K8s</td></tr>
+    <tr><td style="padding: 0.6rem; font-weight: 600;">信创适配</td><td style="padding: 0.6rem;">达梦/人大金仓（PG兼容）+ 麒麟OS + 东方通</td><td style="padding: 0.6rem; font-size: 0.8rem;">基于PG协议兼容，迁移成本低</td></tr>
+  </table>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>☁️ 部署架构（MVP阶段）</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem;">
+    <div style="text-align: center; padding: 0.6rem; background: #e8f5e9; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.85rem;">
+      <strong>🌐 Nginx（反向代理 + 静态资源 + HTTPS）</strong>
+    </div>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <div style="flex:1; padding: 0.5rem; background: #e3f2fd; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>网关</strong><br>Spring Cloud<br>Gateway
+      </div>
+      <div style="flex:1; padding: 0.5rem; background: #e3f2fd; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>前端</strong><br>Nginx静态<br>Vue3 SPA
+      </div>
+    </div>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <div style="flex:1; padding: 0.5rem; background: #fff3e0; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>资产服务</strong><br>SpringBoot<br>:8081
+      </div>
+      <div style="flex:1; padding: 0.5rem; background: #fff3e0; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>报表服务</strong><br>SpringBoot<br>:8082
+      </div>
+      <div style="flex:1; padding: 0.5rem; background: #fff3e0; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>财务对接</strong><br>SpringBoot<br>:8083
+      </div>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <div style="flex:1; padding: 0.5rem; background: #fce4ec; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>PostgreSQL</strong><br>:5432
+      </div>
+      <div style="flex:1; padding: 0.5rem; background: #fce4ec; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>Redis</strong><br>:6379
+      </div>
+      <div style="flex:1; padding: 0.5rem; background: #fce4ec; border-radius: 6px; text-align: center; font-size: 0.78rem;">
+        <strong>MinIO</strong><br>:9000
+      </div>
+    </div>
+    <div style="margin-top: 0.8rem; padding: 0.5rem; background: #fafafa; border-radius: 6px; font-size: 0.75rem; text-align: center;">
+      📦 全部Docker Compose编排 · 单服务器4C16G起步 · 后续扩展为K8s集群
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>📅 MVP交付拆分（7月底）</h3>
+  <table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
+    <tr style="background: #f8f8f8;"><td style="padding: 0.5rem; font-weight: 700;">迭代</td><td style="padding: 0.5rem; font-weight: 700;">时间</td><td style="padding: 0.5rem; font-weight: 700;">交付内容</td></tr>
+    <tr><td style="padding: 0.5rem; font-weight: 600;">Sprint 0</td><td style="padding: 0.5rem;">第1周</td><td style="padding: 0.5rem;">项目初始化 · CI/CD · 基础框架 · 租户+权限模型 · 资产分类字典</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.5rem; font-weight: 600;">Sprint 1</td><td style="padding: 0.5rem;">第2-3周</td><td style="padding: 0.5rem;">资产登记（台账） · Excel批量导入 · 组织架构树 · 基础查询</td></tr>
+    <tr><td style="padding: 0.5rem; font-weight: 600;">Sprint 2</td><td style="padding: 0.5rem;">第4-5周</td><td style="padding: 0.5rem;">变动管理 · 折旧计提 · 处置流程 · 报表引擎（核心3-5类报表）</td></tr>
+    <tr style="background: #fafafa;"><td style="padding: 0.5rem; font-weight: 600;">Sprint 3</td><td style="padding: 0.5rem;">第6-7周</td><td style="padding: 0.5rem;">上报流程 · 驾驶舱（核心指标） · 财务对接（1家试点） · 试点企业上线</td></tr>
+  </table>
+</div>

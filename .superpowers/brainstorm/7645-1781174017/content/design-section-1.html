@@ -1,0 +1,117 @@
+<h2>设计第一节：系统总体架构 &amp; 核心数据模型</h2>
+<p class="subtitle">分层架构 · SaaS多租户 · 全生命周期固定资产管理</p>
+
+<div class="section">
+  <h3>🏗️ 系统总体架构（分层视图）</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 0.5rem;">
+    <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+
+      <!-- 接入层 -->
+      <div style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: #fafafa;">
+        <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px;">接入层</div>
+        <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
+          <div style="flex:1; padding: 0.3rem; background: white; border-radius: 4px; border: 1px solid #e0e0e0; text-align: center; font-size: 0.85rem;">Web管理端</div>
+          <div style="flex:1; padding: 0.3rem; background: white; border-radius: 4px; border: 1px solid #e0e0e0; text-align: center; font-size: 0.85rem;">移动端/小程序</div>
+          <div style="flex:1; padding: 0.3rem; background: white; border-radius: 4px; border: 1px solid #e0e0e0; text-align: center; font-size: 0.85rem;">OpenAPI</div>
+        </div>
+      </div>
+
+      <div style="text-align: center; font-size: 1.2rem; color: #bbb;">⬇</div>
+
+      <!-- 应用层 -->
+      <div style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: #e8f5e9;">
+        <div style="font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">应用层</div>
+        <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
+          <div style="flex:1; padding: 0.4rem; background: white; border-radius: 4px; border: 1px solid #c8e6c9; text-align: center; font-size: 0.8rem;">🏢 企业门户<br><span style="font-size:0.7rem;color:#999;">资产管理 · 数据上报</span></div>
+          <div style="flex:1; padding: 0.4rem; background: white; border-radius: 4px; border: 1px solid #c8e6c9; text-align: center; font-size: 0.8rem;">🏛️ 集团门户<br><span style="font-size:0.7rem;color:#999;">审核汇总 · 穿透查看</span></div>
+          <div style="flex:1; padding: 0.4rem; background: white; border-radius: 4px; border: 1px solid #c8e6c9; text-align: center; font-size: 0.8rem;">📊 国资委驾驶舱<br><span style="font-size:0.7rem;color:#999;">监管大屏 · 报表中心</span></div>
+          <div style="flex:1; padding: 0.4rem; background: white; border-radius: 4px; border: 1px solid #c8e6c9; text-align: center; font-size: 0.8rem;">⚙️ 系统管理<br><span style="font-size:0.7rem;color:#999;">租户·权限·配置</span></div>
+        </div>
+      </div>
+
+      <div style="text-align: center; font-size: 1.2rem; color: #bbb;">⬇</div>
+
+      <!-- 业务服务层 -->
+      <div style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: #e3f2fd;">
+        <div style="font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">业务服务层（MVP 5个核心服务）</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; margin-top: 0.3rem;">
+          <div style="padding: 0.4rem; background: white; border-radius: 4px; border-left: 3px solid #1976d2; font-size: 0.8rem;">1. 资产登记服务<br><span style="font-size:0.65rem;color:#999;">验收·入库·建卡·目录</span></div>
+          <div style="padding: 0.4rem; background: white; border-radius: 4px; border-left: 3px solid #1976d2; font-size: 0.8rem;">2. 变动管理服务<br><span style="font-size:0.65rem;color:#999;">调拨·转让·抵押·闲置</span></div>
+          <div style="padding: 0.4rem; background: white; border-radius: 4px; border-left: 3px solid #1976d2; font-size: 0.8rem;">3. 折旧处置服务<br><span style="font-size:0.65rem;color:#999;">折旧计提·报废·核销</span></div>
+          <div style="padding: 0.4rem; background: white; border-radius: 4px; border-left: 3px solid #1976d2; font-size: 0.8rem;">4. 报表上报服务<br><span style="font-size:0.65rem;color:#999;">数据采集·审核链·上报</span></div>
+          <div style="padding: 0.4rem; background: white; border-radius: 4px; border-left: 3px solid #1976d2; font-size: 0.8rem;">5. 财务对接服务<br><span style="font-size:0.65rem;color:#999;">接口适配·数据拉取·校验</span></div>
+          <div style="padding: 0.4rem; background: #f5f5f5; border-radius: 4px; border: 1px dashed #ccc; font-size: 0.75rem; text-align: center; color: #999;">后续扩展：租赁·投资·自然资源...</div>
+        </div>
+      </div>
+
+      <div style="text-align: center; font-size: 1.2rem; color: #bbb;">⬇</div>
+
+      <!-- 数据层 -->
+      <div style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: #fff3e0;">
+        <div style="font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">数据层（MVP 3张核心模型 + 2张支撑模型）</div>
+        <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
+          <div style="flex:1; padding: 0.35rem; background: white; border-radius: 4px; border-bottom: 3px solid #ff9800; text-align: center; font-size: 0.75rem;">资产台账<br><span style="font-size:0.6rem;color:#999;">核心主数据</span></div>
+          <div style="flex:1; padding: 0.35rem; background: white; border-radius: 4px; border-bottom: 3px solid #ff9800; text-align: center; font-size: 0.75rem;">组织架构<br><span style="font-size:0.6rem;color:#999;">租户·层级·权限</span></div>
+          <div style="flex:1; padding: 0.35rem; background: white; border-radius: 4px; border-bottom: 3px solid #ff9800; text-align: center; font-size: 0.75rem;">报表数据<br><span style="font-size:0.6rem;color:#999;">采集·快照·汇总</span></div>
+          <div style="flex:1; padding: 0.35rem; background: white; border-radius: 4px; border-bottom: 3px solid #ccc; text-align: center; font-size: 0.75rem;">财务数据<br><span style="font-size:0.6rem;color:#999;">对接缓存</span></div>
+          <div style="flex:1; padding: 0.35rem; background: white; border-radius: 4px; border-bottom: 3px solid #ccc; text-align: center; font-size: 0.75rem;">配置字典<br><span style="font-size:0.6rem;color:#999;">资产分类·编码</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>📦 核心实体关系（ER简图）</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="padding: 1rem; font-size: 0.85rem; line-height: 1.8;">
+    <div style="padding: 0.5rem; border: 2px solid #ff9800; border-radius: 8px; margin-bottom: 0.5rem; text-align: center;">
+      <strong>Organization（组织/租户）</strong><br>
+      <span style="font-size:0.75rem;color:#666;">id · parent_id（树形） · org_type（委/集团/企业/部门）· tenant_id · status</span>
+    </div>
+    <div style="text-align: center; color:#999;">1 : N</div>
+    <div style="padding: 0.5rem; border: 2px solid #ff9800; border-radius: 8px; margin: 0.5rem 0; text-align: center;">
+      <strong>Asset（资产台账）</strong><br>
+      <span style="font-size:0.75rem;color:#666;">id · asset_code · name · category（土地/房产/设备...）· org_id · status · original_value ·</span><br>
+      <span style="font-size:0.75rem;color:#666;">current_value · depre_method · purchase_date · location · use_status · source（自购/划转/...）</span>
+    </div>
+    <div style="text-align: center; color:#999;">1 : N</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+      <div style="padding: 0.4rem; border: 1px solid #1976d2; border-radius: 6px; text-align: center; font-size: 0.8rem;">
+        <strong>AssetChange</strong><br>
+        <span style="font-size:0.65rem;color:#666;">变动记录 · 调拨/转让/抵押</span></div>
+      <div style="padding: 0.4rem; border: 1px solid #1976d2; border-radius: 6px; text-align: center; font-size: 0.8rem;">
+        <strong>Depreciation</strong><br>
+        <span style="font-size:0.65rem;color:#666;">折旧记录 · 累计折旧</span></div>
+      <div style="padding: 0.4rem; border: 1px solid #1976d2; border-radius: 6px; text-align: center; font-size: 0.8rem;">
+        <strong>Disposal</strong><br>
+        <span style="font-size:0.65rem;color:#666;">处置记录 · 报废/出售/核销</span></div>
+    </div>
+    <div style="text-align: center; color:#999; margin-top: 0.8rem;">N : 1</div>
+    <div style="padding: 0.5rem; border: 2px solid #4caf50; border-radius: 8px; margin-top: 0.5rem; text-align: center;">
+      <strong>Report（报表）</strong><br>
+      <span style="font-size:0.75rem;color:#666;">id · report_type（19类之一）· period · org_id · submit_status · version · snapshot_data（JSON）</span>
+    </div>
+    <div style="text-align: center; color:#999; margin-top: 0.5rem;">N : 1</div>
+    <div style="padding: 0.5rem; border: 1px solid #ccc; border-radius: 8px; margin-top: 0.5rem; text-align: center; font-size: 0.8rem;">
+      <strong>FinancialData（财务对接缓存）</strong> — 科目余额 · 固定资产卡片 · 单体报表
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>🔐 多租户数据隔离策略</h3>
+  <table style="width:100%; border-collapse: collapse;">
+    <tr><td style="padding: 0.6rem; border-bottom: 1px solid var(--border); font-weight: 600; width: 30%;">隔离维度</td><td style="padding: 0.6rem; border-bottom: 1px solid var(--border);">方案</td></tr>
+    <tr><td style="padding: 0.6rem; border-bottom: 1px solid var(--border); font-weight: 600;">数据库级</td><td style="padding: 0.6rem; border-bottom: 1px solid var(--border);">共享数据库 + tenant_id 字段隔离（成本最优，满足等保二级）</td></tr>
+    <tr><td style="padding: 0.6rem; border-bottom: 1px solid var(--border); font-weight: 600;">应用级</td><td style="padding: 0.6rem; border-bottom: 1px solid var(--border);">请求上下文自动注入 tenant_id，数据访问层统一过滤</td></tr>
+    <tr><td style="padding: 0.6rem; border-bottom: 1px solid var(--border); font-weight: 600;">Org级</td><td style="padding: 0.6rem; border-bottom: 1px solid var(--border);">树形层级权限：上级可查看下级数据，同级隔离，跨分支不可见</td></tr>
+    <tr><td style="padding: 0.6rem; border-bottom: 1px solid var(--border); font-weight: 600;">角色级</td><td style="padding: 0.6rem; border-bottom: 1px solid var(--border);">RBAC：国资委监管员 / 集团审核员 / 企业操作员 / 系统管理员</td></tr>
+  </table>
+</div>
