@@ -8,7 +8,9 @@ import router from './router'
 
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
+// router must come after pinia because the route guard uses the user store
 app.use(router)
 app.use(ElementPlus)
 
