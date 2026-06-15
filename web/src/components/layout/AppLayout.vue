@@ -96,6 +96,7 @@
             <el-menu-item index="/statistics/depreciation-report"><span>折旧分析</span></el-menu-item>
             <el-menu-item index="/statistics/idle"><span>闲置分析</span></el-menu-item>
             <el-menu-item index="/statistics/rental"><span>出租分析</span></el-menu-item>
+            <el-menu-item index="/exports"><span>📥 报表导出</span></el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="system">
