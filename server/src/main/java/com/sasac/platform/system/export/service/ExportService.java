@@ -1,7 +1,6 @@
 package com.sasac.platform.system.export.service;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,14 +14,16 @@ import com.sasac.platform.asset.mapper.AssetMapper;
 import com.sasac.platform.asset.mapper.DepreciationMapper;
 import com.sasac.platform.common.exception.BusinessException;
 import com.sasac.platform.system.export.ExportType;
+import com.sasac.platform.system.export.dto.AssetExportRow;
+import com.sasac.platform.system.export.dto.DepreciationRow;
 import com.sasac.platform.system.export.dto.ExportRequestDTO;
+import com.sasac.platform.system.export.dto.InventoryReportRow;
 import com.sasac.platform.system.export.entity.ExportTask;
 import com.sasac.platform.system.export.mapper.ExportTaskMapper;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.http.Method;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,8 +33,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -298,59 +297,4 @@ public class ExportService {
         }
     }
 
-    // ========== Excel DTOs ==========
-
-    @Data
-    public static class AssetExportRow {
-        @ExcelProperty("资产名称")
-        private String name;
-        @ExcelProperty("资产编码")
-        private String assetCode;
-        @ExcelProperty("资产分类")
-        private String category;
-        @ExcelProperty("规格型号")
-        private String specification;
-        @ExcelProperty("存放地点")
-        private String location;
-        @ExcelProperty("使用状态")
-        private String useStatus;
-        @ExcelProperty("原值")
-        private BigDecimal originalValue;
-        @ExcelProperty("净值")
-        private BigDecimal currentValue;
-    }
-
-    @Data
-    public static class InventoryReportRow {
-        @ExcelProperty("任务名称")
-        private String taskName;
-        @ExcelProperty("状态")
-        private String status;
-        @ExcelProperty("资产总数")
-        private Integer totalCount;
-        @ExcelProperty("已完成数")
-        private Integer completedCount;
-        @ExcelProperty("差异数")
-        private Integer diffCount;
-        @ExcelProperty("盘点记录数")
-        private Integer recordCount;
-    }
-
-    @Data
-    public static class DepreciationRow {
-        @ExcelProperty("资产名称")
-        private String assetName;
-        @ExcelProperty("资产编码")
-        private String assetCode;
-        @ExcelProperty("折旧期间")
-        private String period;
-        @ExcelProperty("折旧金额")
-        private BigDecimal depreciationAmount;
-        @ExcelProperty("折旧前价值")
-        private BigDecimal beforeValue;
-        @ExcelProperty("折旧后价值")
-        private BigDecimal afterValue;
-        @ExcelProperty("折旧日期")
-        private LocalDate depreciationDate;
-    }
 }
