@@ -49,7 +49,7 @@ public class ExportController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<ApiResponse<String>> download(@PathVariable Long id) {
+    public ResponseEntity<byte[]> download(@PathVariable Long id) {
         ExportTask task = exportService.getTask(id);
         if (task == null) {
             throw new BusinessException("导出任务不存在");
@@ -57,11 +57,17 @@ public class ExportController {
         if (!ExportService.STATUS_COMPLETED.equals(task.getStatus())) {
             throw new BusinessException("导出任务尚未完成");
         }
-        String downloadUrl = exportService.generateDownloadUrl(id);
-        if (downloadUrl == null) {
-            throw new BusinessException("无法生成下载链接");
+        try {
+            byte[] data = exportService.downloadFile(id);
+            String encodedName = java.net.URLEncoder.encode(task.getFileName() != null ? task.getFileName() : "export.xlsx",
+                    java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20");
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename*=UTF-8''" + encodedName)
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(data);
+        } catch (Exception e) {
+            throw new BusinessException("文件下载失败: " + e.getMessage());
         }
-        return ResponseEntity.ok(ApiResponse.success(downloadUrl));
     }
 
     @GetMapping("/template")

@@ -122,7 +122,7 @@ import { UploadFilled } from '@element-plus/icons-vue'
 import {
   createExportTask,
   listExportTasks,
-  getExportDownloadUrl,
+  downloadExportFile,
   downloadTemplate,
   previewImport,
   importReport,
@@ -212,10 +212,13 @@ async function handleExport() {
 
 async function handleDownload(row: ExportTask) {
   try {
-    const res = await getExportDownloadUrl(row.id)
-    if (res.data) {
-      window.open(res.data, '_blank')
-    }
+    const blob = await downloadExportFile(row.id)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = row.fileName || 'export.xlsx'
+    a.click()
+    URL.revokeObjectURL(url)
   } catch {
     // handled by global error handler
   }

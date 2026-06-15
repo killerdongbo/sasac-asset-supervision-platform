@@ -95,6 +95,12 @@ export function getExportDownloadUrl(id: string) {
   return client.get(`/exports/${id}/download`) as Promise<{ data: string }>
 }
 
+export function downloadExportFile(id: string): Promise<Blob> {
+  return client.get(`/exports/${id}/download`, {
+    responseType: 'blob',
+  }) as unknown as Promise<Blob>
+}
+
 export function downloadTemplate(type: string): Promise<Blob> {
   return client.get('/exports/template', {
     params: { type },

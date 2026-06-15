@@ -1116,6 +1116,22 @@ public class ExportService {
         }
     }
 
+    /**
+     * Download exported file content directly (proxied through backend).
+     * Avoids the internal MinIO hostname issue with presigned URLs.
+     */
+    public byte[] downloadFile(Long taskId) throws Exception {
+        ExportTask task = exportTaskMapper.selectById(taskId);
+        if (task == null || task.getFilePath() == null) return null;
+        try (var stream = minioClient.getObject(
+                io.minio.GetObjectArgs.builder()
+                        .bucket(bucket)
+                        .object(task.getFilePath())
+                        .build())) {
+            return stream.readAllBytes();
+        }
+    }
+
     private Long parseOrgId(String params) {
         if (params == null || params.isBlank()) return null;
         try {
