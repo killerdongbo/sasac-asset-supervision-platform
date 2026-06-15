@@ -20,6 +20,26 @@ import com.sasac.platform.system.export.dto.ExportRequestDTO;
 import com.sasac.platform.system.export.dto.InventoryReportRow;
 import com.sasac.platform.system.export.entity.ExportTask;
 import com.sasac.platform.system.export.mapper.ExportTaskMapper;
+import com.sasac.platform.asset.inspection.entity.InspectionAnomaly;
+import com.sasac.platform.asset.inspection.mapper.InspectionAnomalyMapper;
+import com.sasac.platform.report.dto.BalanceSheetRow;
+import com.sasac.platform.report.dto.BuildingAssetDetailRow;
+import com.sasac.platform.report.dto.CreditorRightsRow;
+import com.sasac.platform.report.dto.DataAssetDetailRow;
+import com.sasac.platform.report.dto.EquityInvestmentRow;
+import com.sasac.platform.report.dto.FranchiseRightRow;
+import com.sasac.platform.report.dto.InfrastructureDetailRow;
+import com.sasac.platform.report.dto.IntangibleAssetDetailRow;
+import com.sasac.platform.report.dto.InventoryDetailRow;
+import com.sasac.platform.report.dto.LandAssetDetailRow;
+import com.sasac.platform.report.dto.MachineryEquipDetailRow;
+import com.sasac.platform.report.dto.MonetaryFundDetailRow;
+import com.sasac.platform.report.dto.NaturalResourceDetailRow;
+import com.sasac.platform.report.dto.OtherFixedAssetDetailRow;
+import com.sasac.platform.report.dto.PeFundInvestmentRow;
+import com.sasac.platform.report.dto.ProblemAssetRow;
+import com.sasac.platform.report.dto.ReconciliationRow;
+import com.sasac.platform.report.dto.RevitalizationRow;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -33,9 +53,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,6 +82,7 @@ public class ExportService {
     private final InventoryTaskMapper inventoryTaskMapper;
     private final InventoryRecordMapper inventoryRecordMapper;
     private final DepreciationMapper depreciationMapper;
+    private final InspectionAnomalyMapper inspectionAnomalyMapper;
 
     @Autowired
     @Lazy
@@ -71,13 +96,15 @@ public class ExportService {
                          AssetMapper assetMapper,
                          InventoryTaskMapper inventoryTaskMapper,
                          InventoryRecordMapper inventoryRecordMapper,
-                         DepreciationMapper depreciationMapper) {
+                         DepreciationMapper depreciationMapper,
+                         InspectionAnomalyMapper inspectionAnomalyMapper) {
         this.exportTaskMapper = exportTaskMapper;
         this.minioClient = minioClient;
         this.assetMapper = assetMapper;
         this.inventoryTaskMapper = inventoryTaskMapper;
         this.inventoryRecordMapper = inventoryRecordMapper;
         this.depreciationMapper = depreciationMapper;
+        this.inspectionAnomalyMapper = inspectionAnomalyMapper;
     }
 
     public ExportTask createTask(Long tenantId, Long userId, ExportRequestDTO dto) {
@@ -119,6 +146,25 @@ public class ExportService {
                 case ExportType.ASSET_LIST -> exportAssetList(task);
                 case ExportType.INVENTORY_REPORT -> exportInventoryReport(task);
                 case ExportType.DEPRECIATION_LIST -> exportDepreciationList(task);
+                case ExportType.ASSET_BASE_LIST -> exportAssetBaseList(task);
+                case ExportType.LAND_ASSET_DETAIL -> exportLandAssetDetail(task);
+                case ExportType.BUILDING_ASSET_DETAIL -> exportBuildingAssetDetail(task);
+                case ExportType.INVENTORY_DETAIL -> exportInventoryDetail(task);
+                case ExportType.INTANGIBLE_ASSET_DETAIL -> exportIntangibleAssetDetail(task);
+                case ExportType.MACHINERY_EQUIP_DETAIL -> exportMachineryEquipDetail(task);
+                case ExportType.INFRASTRUCTURE_DETAIL -> exportInfrastructureDetail(task);
+                case ExportType.OTHER_FIXED_ASSET_DETAIL -> exportOtherFixedAssetDetail(task);
+                case ExportType.REVITALIZATION_LIST -> exportRevitalizationList(task);
+                case ExportType.PROBLEM_ASSET_LIST -> exportProblemAssetList(task);
+                case ExportType.EQUITY_INVESTMENT_DETAIL -> exportEquityInvestmentDetail(task);
+                case ExportType.CREDITOR_RIGHTS_DETAIL -> exportCreditorRightsDetail(task);
+                case ExportType.PE_FUND_INVESTMENT_DETAIL -> exportPeFundInvestmentDetail(task);
+                case ExportType.FRANCHISE_RIGHT_DETAIL -> exportFranchiseRightDetail(task);
+                case ExportType.DATA_ASSET_DETAIL -> exportDataAssetDetail(task);
+                case ExportType.NATURAL_RESOURCE_DETAIL -> exportNaturalResourceDetail(task);
+                case ExportType.MONETARY_FUND_DETAIL -> exportMonetaryFundDetail(task);
+                case ExportType.BALANCE_SHEET -> exportBalanceSheet(task);
+                case ExportType.RECONCILIATION_TABLE -> exportReconciliationTable(task);
                 default -> throw new BusinessException("不支持的导出类型: " + exportType);
             }
 
@@ -235,6 +281,622 @@ public class ExportService {
         writeAndUpload(task, rows, DepreciationRow.class, "折旧明细", "折旧明细");
     }
 
+    // ========== Asset base list ==========
+
+    private void exportAssetBaseList(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .orderByAsc(Asset::getCategory);
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+
+        List<AssetExportRow> rows = assets.stream().map(a -> {
+            AssetExportRow r = new AssetExportRow();
+            r.setName(a.getName());
+            r.setAssetCode(a.getAssetCode());
+            r.setCategory(a.getCategory());
+            r.setSpecification(a.getSpecification());
+            r.setLocation(a.getLocation());
+            r.setUseStatus(a.getUseStatus());
+            r.setOriginalValue(a.getOriginalValue());
+            r.setCurrentValue(a.getCurrentValue());
+            return r;
+        }).collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, AssetExportRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Land asset detail ==========
+
+    private void exportLandAssetDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .like(Asset::getCategory, "土地");
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<LandAssetDetailRow> rows = assets.stream()
+            .map(a -> LandAssetDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .landName(a.getName())
+                .location(a.getLocation())
+                .area(a.getSpecification() != null ? new BigDecimal(a.getSpecification().replaceAll("[^0-9.]", "")) : null)
+                .ownershipType(getAssetAttr(a, "ownershipType"))
+                .certificateNo(a.getCertificateNo())
+                .usageCategory(a.getCategory())
+                .acquisitionMethod(getAssetAttr(a, "acquisitionMethod"))
+                .acquisitionDate(a.getPurchaseDate())
+                .usefulLifeYears(a.getUsefulLifeMonths() != null ? a.getUsefulLifeMonths() / 12 : null)
+                .originalValue(a.getOriginalValue())
+                .currentValue(a.getCurrentValue())
+                .isIdle("IDLE".equals(a.getUseStatus()) ? "是" : "否")
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, LandAssetDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Building asset detail ==========
+
+    private void exportBuildingAssetDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .like(Asset::getCategory, "房屋");
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<BuildingAssetDetailRow> rows = assets.stream()
+            .map(a -> BuildingAssetDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .buildingName(a.getName())
+                .location(a.getLocation())
+                .structureType(getAssetAttr(a, "structureType"))
+                .area(a.getSpecification() != null ? new BigDecimal(a.getSpecification().replaceAll("[^0-9.]", "")) : null)
+                .certificateNo(a.getCertificateNo())
+                .completionDate(null)
+                .usefulLifeYears(a.getUsefulLifeMonths() != null ? a.getUsefulLifeMonths() / 12 : null)
+                .originalValue(a.getOriginalValue())
+                .currentValue(a.getCurrentValue())
+                .useStatus(a.getUseStatus())
+                .isRented(null)
+                .annualRent(null)
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, BuildingAssetDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Inventory detail ==========
+
+    private void exportInventoryDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .like(Asset::getCategory, "存货");
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<InventoryDetailRow> rows = assets.stream()
+            .map(a -> InventoryDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .inventoryName(a.getName())
+                .category(a.getCategory())
+                .unit(a.getUnit())
+                .quantity(a.getQuantity() != null ? BigDecimal.valueOf(a.getQuantity()) : null)
+                .unitPrice(null)
+                .amount(a.getOriginalValue())
+                .location(a.getLocation())
+                .storageAge(null)
+                .isStagnant(null)
+                .impairmentProvision(null)
+                .inventoryDate(null)
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, InventoryDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Intangible asset detail ==========
+
+    private void exportIntangibleAssetDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .like(Asset::getCategory, "无形");
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<IntangibleAssetDetailRow> rows = assets.stream()
+            .map(a -> IntangibleAssetDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .assetName(a.getName())
+                .category(a.getCategory())
+                .registrationNo(a.getCertificateNo())
+                .acquisitionMethod(getAssetAttr(a, "acquisitionMethod"))
+                .acquisitionDate(a.getPurchaseDate())
+                .amortizationYears(a.getUsefulLifeMonths() != null ? a.getUsefulLifeMonths() / 12 : null)
+                .originalValue(a.getOriginalValue())
+                .accumulatedAmortization(a.getAccumulatedDepreciation())
+                .currentValue(a.getCurrentValue())
+                .isPledged(null)
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, IntangibleAssetDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Machinery & equipment detail ==========
+
+    private void exportMachineryEquipDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .and(w -> w.like(Asset::getCategory, "机器")
+                    .or().like(Asset::getCategory, "设备"));
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<MachineryEquipDetailRow> rows = assets.stream()
+            .map(a -> MachineryEquipDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .equipmentName(a.getName())
+                .specification(a.getSpecification())
+                .manufacturer(null)
+                .serialNo(null)
+                .productionDate(null)
+                .operationDate(null)
+                .designLifeYears(a.getUsefulLifeMonths() != null ? a.getUsefulLifeMonths() / 12 : null)
+                .originalValue(a.getOriginalValue())
+                .currentValue(a.getCurrentValue())
+                .newnessRate(null)
+                .useStatus(a.getUseStatus())
+                .maintenanceFrequency(null)
+                .location(a.getLocation())
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, MachineryEquipDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Infrastructure detail ==========
+
+    private void exportInfrastructureDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .like(Asset::getCategory, "基础");
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<InfrastructureDetailRow> rows = assets.stream()
+            .map(a -> InfrastructureDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .facilityName(a.getName())
+                .facilityType(a.getCategory())
+                .location(a.getLocation())
+                .scale(a.getSpecification())
+                .unit(a.getUnit())
+                .completionDate(null)
+                .designLifeYears(a.getUsefulLifeMonths() != null ? a.getUsefulLifeMonths() / 12 : null)
+                .originalValue(a.getOriginalValue())
+                .currentValue(a.getCurrentValue())
+                .useStatus(a.getUseStatus())
+                .managementDept(a.getUseDepartment())
+                .isTollOperation(null)
+                .annualRevenue(null)
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, InfrastructureDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Other fixed asset detail (catch-all) ==========
+
+    private void exportOtherFixedAssetDetail(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .and(w -> w.notLike(Asset::getCategory, "土地")
+                    .notLike(Asset::getCategory, "房屋")
+                    .notLike(Asset::getCategory, "存货")
+                    .notLike(Asset::getCategory, "无形")
+                    .notLike(Asset::getCategory, "机器")
+                    .notLike(Asset::getCategory, "设备")
+                    .notLike(Asset::getCategory, "基础"));
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<OtherFixedAssetDetailRow> rows = assets.stream()
+            .map(a -> OtherFixedAssetDetailRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .assetName(a.getName())
+                .category(a.getCategory())
+                .specification(a.getSpecification())
+                .unit(a.getUnit())
+                .quantity(a.getQuantity())
+                .acquisitionDate(a.getPurchaseDate())
+                .originalValue(a.getOriginalValue())
+                .currentValue(a.getCurrentValue())
+                .accumulatedDepreciation(a.getAccumulatedDepreciation())
+                .useStatus(a.getUseStatus())
+                .location(a.getLocation())
+                .useDepartment(a.getUseDepartment())
+                .custodian(a.getCustodian())
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, OtherFixedAssetDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Revitalization list (idle assets) ==========
+
+    private void exportRevitalizationList(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId())
+                .eq(Asset::getUseStatus, "IDLE");
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> assets = assetMapper.selectList(qw);
+        AtomicInteger seq = new AtomicInteger(1);
+        List<RevitalizationRow> rows = assets.stream()
+            .map(a -> RevitalizationRow.builder()
+                .seq(seq.getAndIncrement())
+                .assetCode(a.getAssetCode())
+                .assetName(a.getName())
+                .revitalizationMethod(null)
+                .originalStatus(a.getUseStatus())
+                .originalValue(a.getOriginalValue())
+                .revitalizationRevenue(null)
+                .revitalizationDate(null)
+                .currentStatus(a.getUseStatus())
+                .beneficiary(null)
+                .approvalNo(null)
+                .remark(a.getRemark())
+                .build())
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, RevitalizationRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Problem asset list (from inspection anomalies) ==========
+
+    private void exportProblemAssetList(ExportTask task) {
+        // Note: orgId filtering is not applied here because InspectionAnomaly
+        // lacks an orgId column. Cross-org filtering will be supported when
+        // the anomaly table is extended with org affiliation.
+        LambdaQueryWrapper<InspectionAnomaly> qw = new LambdaQueryWrapper<InspectionAnomaly>()
+                .eq(InspectionAnomaly::getTenantId, task.getTenantId());
+        List<InspectionAnomaly> anomalies = inspectionAnomalyMapper.selectList(qw);
+
+        List<Long> assetIds = anomalies.stream()
+                .map(InspectionAnomaly::getAssetId)
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, Asset> assetMap = assetIds.isEmpty() ? Map.of() :
+                assetMapper.selectBatchIds(assetIds).stream()
+                        .collect(Collectors.toMap(Asset::getId, Function.identity()));
+
+        AtomicInteger seq = new AtomicInteger(1);
+        List<ProblemAssetRow> rows = anomalies.stream()
+            .map(anomaly -> {
+                Asset asset = assetMap.get(anomaly.getAssetId());
+                ProblemAssetRow r = new ProblemAssetRow();
+                r.setSeq(seq.getAndIncrement());
+                r.setAssetCode(asset != null ? asset.getAssetCode() : null);
+                r.setAssetName(asset != null ? asset.getName() : null);
+                r.setProblemType(anomaly.getAnomalyType());
+                r.setDescription(anomaly.getDescription());
+                r.setAmount(asset != null ? asset.getOriginalValue() : null);
+                r.setFoundDate(anomaly.getCreatedAt() != null ? anomaly.getCreatedAt().toLocalDate() : null);
+                r.setMeasure(anomaly.getResolution());
+                r.setResponsibleDept(null);
+                r.setStatus(anomaly.getStatus());
+                r.setCompletedDate(null);
+                r.setRemark(null);
+                return r;
+            })
+            .collect(Collectors.toList());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, ProblemAssetRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Reports needing new tables (empty data for now) ==========
+
+    private void exportEquityInvestmentDetail(ExportTask task) {
+        // TODO: Phase 6 — query from equity investment table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), EquityInvestmentRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    private void exportCreditorRightsDetail(ExportTask task) {
+        // TODO: Phase 6 — query from creditor rights table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), CreditorRightsRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    private void exportPeFundInvestmentDetail(ExportTask task) {
+        // TODO: Phase 6 — query from PE fund investment table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), PeFundInvestmentRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    private void exportFranchiseRightDetail(ExportTask task) {
+        // TODO: Phase 6 — query from franchise right table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), FranchiseRightRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    private void exportDataAssetDetail(ExportTask task) {
+        // TODO: Phase 6 — query from data asset table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), DataAssetDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    private void exportNaturalResourceDetail(ExportTask task) {
+        // TODO: Phase 6 — query from natural resource table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), NaturalResourceDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    private void exportMonetaryFundDetail(ExportTask task) {
+        // TODO: Phase 6 — query from monetary fund table
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, List.of(), MonetaryFundDetailRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Balance sheet ==========
+
+    private void exportBalanceSheet(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> allAssets = assetMapper.selectList(qw);
+
+        BigDecimal totalOriginalValue = allAssets.stream()
+                .map(Asset::getOriginalValue)
+                .filter(v -> v != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalCurrentValue = allAssets.stream()
+                .map(Asset::getCurrentValue)
+                .filter(v -> v != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        List<BalanceSheetRow> rows = new ArrayList<>();
+        rows.add(BalanceSheetRow.builder().seq(1).item("流动资产合计").lineNo(1).endBalance(null).startBalance(null).remark("").build());
+        rows.add(BalanceSheetRow.builder().seq(2).item("  货币资金").lineNo(2).endBalance(null).startBalance(null).remark("").build());
+        rows.add(BalanceSheetRow.builder().seq(3).item("非流动资产合计").lineNo(3).endBalance(null).startBalance(null).remark("").build());
+        rows.add(BalanceSheetRow.builder().seq(4).item("  固定资产").lineNo(4).endBalance(totalOriginalValue).startBalance(null).remark("原值合计").build());
+        rows.add(BalanceSheetRow.builder().seq(5).item("  固定资产净值").lineNo(5).endBalance(totalCurrentValue).startBalance(null).remark("净值合计").build());
+        rows.add(BalanceSheetRow.builder().seq(6).item("  无形资产").lineNo(6).endBalance(null).startBalance(null).remark("").build());
+        rows.add(BalanceSheetRow.builder().seq(7).item("资产总计").lineNo(7).endBalance(totalOriginalValue).startBalance(null).remark("").build());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, BalanceSheetRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
+    // ========== Reconciliation table ==========
+
+    private void exportReconciliationTable(ExportTask task) {
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(Asset::getOrgId, orgId);
+        }
+        List<Asset> allAssets = assetMapper.selectList(qw);
+
+        // Define category groups: {like-pattern, detail-table-name}
+        String[][] categoryGroups = {
+            {"土地", "土地类资产清查明细表"},
+            {"房屋", "房屋建筑类清查明细表"},
+            {"机器", "大型机器设备清查明细表"},
+            {"设备", "大型机器设备清查明细表"},
+            {"基础", "基础设施资产清查明细表"},
+            {"存货", "存货清查明细表"},
+            {"无形", "无形资产清查明细表"},
+        };
+
+        List<ReconciliationRow> rows = new ArrayList<>();
+        AtomicInteger seq = new AtomicInteger(1);
+
+        for (String[] group : categoryGroups) {
+            String categoryLike = group[0];
+            String tableName = group[1];
+
+            List<Asset> groupAssets = allAssets.stream()
+                .filter(a -> a.getCategory() != null && a.getCategory().contains(categoryLike))
+                .collect(Collectors.toList());
+
+            BigDecimal detailOriginalValue = groupAssets.stream()
+                .map(Asset::getOriginalValue)
+                .filter(v -> v != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal detailCurrentValue = groupAssets.stream()
+                .map(Asset::getCurrentValue)
+                .filter(v -> v != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            rows.add(ReconciliationRow.builder()
+                .seq(seq.getAndIncrement())
+                .category(categoryLike)
+                .detailTableName(tableName)
+                .detailCount(groupAssets.size())
+                .detailOriginalValue(detailOriginalValue)
+                .detailCurrentValue(detailCurrentValue)
+                .baseListOriginalValue(detailOriginalValue)
+                .baseListCurrentValue(detailCurrentValue)
+                .originalValueDiff(BigDecimal.ZERO)
+                .currentValueDiff(BigDecimal.ZERO)
+                .diffReason("同一数据源")
+                .isConsistent("是")
+                .build());
+        }
+
+        // Other — catch-all
+        List<Asset> otherAssets = allAssets.stream()
+            .filter(a -> a.getCategory() == null
+                || (!a.getCategory().contains("土地")
+                    && !a.getCategory().contains("房屋")
+                    && !a.getCategory().contains("机器")
+                    && !a.getCategory().contains("设备")
+                    && !a.getCategory().contains("基础")
+                    && !a.getCategory().contains("存货")
+                    && !a.getCategory().contains("无形")))
+            .collect(Collectors.toList());
+
+        BigDecimal otherOriginalValue = otherAssets.stream()
+            .map(Asset::getOriginalValue)
+            .filter(v -> v != null)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal otherCurrentValue = otherAssets.stream()
+            .map(Asset::getCurrentValue)
+            .filter(v -> v != null)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        rows.add(ReconciliationRow.builder()
+            .seq(seq.getAndIncrement())
+            .category("其他")
+            .detailTableName("其他固定资产清查明细表")
+            .detailCount(otherAssets.size())
+            .detailOriginalValue(otherOriginalValue)
+            .detailCurrentValue(otherCurrentValue)
+            .baseListOriginalValue(otherOriginalValue)
+            .baseListCurrentValue(otherCurrentValue)
+            .originalValueDiff(BigDecimal.ZERO)
+            .currentValueDiff(BigDecimal.ZERO)
+            .diffReason("同一数据源")
+            .isConsistent("是")
+            .build());
+
+        String displayName = ExportType.label(task.getExportType());
+        try {
+            writeAndUpload(task, rows, ReconciliationRow.class, displayName, displayName);
+        } catch (Exception e) {
+            throw new RuntimeException("导出" + displayName + "失败", e);
+        }
+    }
+
     // ========== MinIO helpers ==========
 
     private String uploadToMinio(ExportTask task, File file, String fileName) throws Exception {
@@ -295,6 +957,15 @@ public class ExportService {
         } finally {
             tempFile.delete();
         }
+    }
+
+    /**
+     * Placeholder helper to retrieve extended attributes from an Asset.
+     * Currently returns null; will be replaced with proper attribute
+     * resolution when extended attribute tables (e.g. asset_attr) are introduced.
+     */
+    private String getAssetAttr(Asset a, String key) {
+        return null;
     }
 
 }
