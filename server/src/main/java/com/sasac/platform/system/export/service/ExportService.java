@@ -40,6 +40,20 @@ import com.sasac.platform.report.dto.PeFundInvestmentRow;
 import com.sasac.platform.report.dto.ProblemAssetRow;
 import com.sasac.platform.report.dto.ReconciliationRow;
 import com.sasac.platform.report.dto.RevitalizationRow;
+import com.sasac.platform.report.entity.EquityInvestment;
+import com.sasac.platform.report.entity.CreditorRights;
+import com.sasac.platform.report.entity.PeFundInvestment;
+import com.sasac.platform.report.entity.FranchiseRight;
+import com.sasac.platform.report.entity.DataAsset;
+import com.sasac.platform.report.entity.NaturalResource;
+import com.sasac.platform.report.entity.CashAccount;
+import com.sasac.platform.report.mapper.EquityInvestmentMapper;
+import com.sasac.platform.report.mapper.CreditorRightsMapper;
+import com.sasac.platform.report.mapper.PeFundInvestmentMapper;
+import com.sasac.platform.report.mapper.FranchiseRightMapper;
+import com.sasac.platform.report.mapper.DataAssetMapper;
+import com.sasac.platform.report.mapper.NaturalResourceMapper;
+import com.sasac.platform.report.mapper.CashAccountMapper;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -83,6 +97,13 @@ public class ExportService {
     private final InventoryRecordMapper inventoryRecordMapper;
     private final DepreciationMapper depreciationMapper;
     private final InspectionAnomalyMapper inspectionAnomalyMapper;
+    private final EquityInvestmentMapper equityInvestmentMapper;
+    private final CreditorRightsMapper creditorRightsMapper;
+    private final PeFundInvestmentMapper peFundInvestmentMapper;
+    private final FranchiseRightMapper franchiseRightMapper;
+    private final DataAssetMapper dataAssetMapper;
+    private final NaturalResourceMapper naturalResourceMapper;
+    private final CashAccountMapper cashAccountMapper;
 
     @Autowired
     @Lazy
@@ -97,7 +118,14 @@ public class ExportService {
                          InventoryTaskMapper inventoryTaskMapper,
                          InventoryRecordMapper inventoryRecordMapper,
                          DepreciationMapper depreciationMapper,
-                         InspectionAnomalyMapper inspectionAnomalyMapper) {
+                         InspectionAnomalyMapper inspectionAnomalyMapper,
+                         EquityInvestmentMapper equityInvestmentMapper,
+                         CreditorRightsMapper creditorRightsMapper,
+                         PeFundInvestmentMapper peFundInvestmentMapper,
+                         FranchiseRightMapper franchiseRightMapper,
+                         DataAssetMapper dataAssetMapper,
+                         NaturalResourceMapper naturalResourceMapper,
+                         CashAccountMapper cashAccountMapper) {
         this.exportTaskMapper = exportTaskMapper;
         this.minioClient = minioClient;
         this.assetMapper = assetMapper;
@@ -105,6 +133,13 @@ public class ExportService {
         this.inventoryRecordMapper = inventoryRecordMapper;
         this.depreciationMapper = depreciationMapper;
         this.inspectionAnomalyMapper = inspectionAnomalyMapper;
+        this.equityInvestmentMapper = equityInvestmentMapper;
+        this.creditorRightsMapper = creditorRightsMapper;
+        this.peFundInvestmentMapper = peFundInvestmentMapper;
+        this.franchiseRightMapper = franchiseRightMapper;
+        this.dataAssetMapper = dataAssetMapper;
+        this.naturalResourceMapper = naturalResourceMapper;
+        this.cashAccountMapper = cashAccountMapper;
     }
 
     public ExportTask createTask(Long tenantId, Long userId, ExportRequestDTO dto) {
@@ -689,70 +724,221 @@ public class ExportService {
     // ========== Reports needing new tables (empty data for now) ==========
 
     private void exportEquityInvestmentDetail(ExportTask task) {
-        // TODO: Phase 6 — query from equity investment table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<EquityInvestment> qw = new LambdaQueryWrapper<EquityInvestment>()
+                .eq(EquityInvestment::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(EquityInvestment::getOrgId, orgId);
+        }
+        List<EquityInvestment> list = equityInvestmentMapper.selectList(qw);
+        List<EquityInvestmentRow> rows = list.stream()
+            .map(e -> EquityInvestmentRow.builder()
+                .enterpriseName(e.getEnterpriseName())
+                .creditCode(e.getCreditCode())
+                .investDate(e.getInvestDate())
+                .investMethod(e.getInvestMethod())
+                .shareRatio(e.getShareRatio())
+                .investAmount(e.getInvestAmount())
+                .cumulativeDividend(e.getCumulativeDividend())
+                .bookValue(e.getBookValue())
+                .fairValue(e.getFairValue())
+                .isImpaired(e.getIsImpaired() != null && e.getIsImpaired() ? "是" : "否")
+                .impairmentAmount(e.getImpairmentAmount())
+                .enterpriseStatus(e.getEnterpriseStatus())
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), EquityInvestmentRow.class, displayName, displayName);
+            writeAndUpload(task, rows, EquityInvestmentRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
     }
 
     private void exportCreditorRightsDetail(ExportTask task) {
-        // TODO: Phase 6 — query from creditor rights table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<CreditorRights> qw = new LambdaQueryWrapper<CreditorRights>()
+                .eq(CreditorRights::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(CreditorRights::getOrgId, orgId);
+        }
+        List<CreditorRights> list = creditorRightsMapper.selectList(qw);
+        List<CreditorRightsRow> rows = list.stream()
+            .map(e -> CreditorRightsRow.builder()
+                .creditorCode(e.getCreditorCode())
+                .debtorName(e.getDebtorName())
+                .rightsType(e.getRightsType())
+                .amount(e.getAmount())
+                .formedDate(e.getFormedDate())
+                .aging(e.getAging())
+                .badDebtProvision(e.getBadDebtProvision())
+                .estimatedRecoverable(e.getEstimatedRecoverable())
+                .collectionStatus(e.getCollectionStatus())
+                .contractNo(e.getContractNo())
+                .isLitigation(e.getIsLitigation() != null && e.getIsLitigation() ? "是" : "否")
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), CreditorRightsRow.class, displayName, displayName);
+            writeAndUpload(task, rows, CreditorRightsRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
     }
 
     private void exportPeFundInvestmentDetail(ExportTask task) {
-        // TODO: Phase 6 — query from PE fund investment table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<PeFundInvestment> qw = new LambdaQueryWrapper<PeFundInvestment>()
+                .eq(PeFundInvestment::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(PeFundInvestment::getOrgId, orgId);
+        }
+        List<PeFundInvestment> list = peFundInvestmentMapper.selectList(qw);
+        List<PeFundInvestmentRow> rows = list.stream()
+            .map(e -> PeFundInvestmentRow.builder()
+                .fundName(e.getFundName())
+                .fundManager(e.getFundManager())
+                .fundType(e.getFundType())
+                .subscribedAmount(e.getSubscribedAmount())
+                .paidAmount(e.getPaidAmount())
+                .investDate(e.getInvestDate())
+                .fundDuration(e.getFundDuration())
+                .currentNav(e.getCurrentNav())
+                .cumulativeReturn(e.getCumulativeReturn())
+                .isViolation(e.getIsViolation() != null && e.getIsViolation() ? "是" : "否")
+                .recordNo(e.getRecordNo())
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), PeFundInvestmentRow.class, displayName, displayName);
+            writeAndUpload(task, rows, PeFundInvestmentRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
     }
 
     private void exportFranchiseRightDetail(ExportTask task) {
-        // TODO: Phase 6 — query from franchise right table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<FranchiseRight> qw = new LambdaQueryWrapper<FranchiseRight>()
+                .eq(FranchiseRight::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(FranchiseRight::getOrgId, orgId);
+        }
+        List<FranchiseRight> list = franchiseRightMapper.selectList(qw);
+        List<FranchiseRightRow> rows = list.stream()
+            .map(e -> FranchiseRightRow.builder()
+                .rightName(e.getRightName())
+                .authorizer(e.getAuthorizer())
+                .startDate(e.getStartDate())
+                .endDate(e.getEndDate())
+                .authorizedArea(e.getAuthorizedArea())
+                .businessScope(e.getBusinessScope())
+                .authorizationFee(e.getAuthorizationFee())
+                .annualFee(e.getAnnualFee())
+                .isExpired(e.getIsExpired() != null && e.getIsExpired() ? "是" : "否")
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), FranchiseRightRow.class, displayName, displayName);
+            writeAndUpload(task, rows, FranchiseRightRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
     }
 
     private void exportDataAssetDetail(ExportTask task) {
-        // TODO: Phase 6 — query from data asset table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<DataAsset> qw = new LambdaQueryWrapper<DataAsset>()
+                .eq(DataAsset::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(DataAsset::getOrgId, orgId);
+        }
+        List<DataAsset> list = dataAssetMapper.selectList(qw);
+        List<DataAssetDetailRow> rows = list.stream()
+            .map(e -> DataAssetDetailRow.builder()
+                .dataName(e.getDataName())
+                .dataType(e.getDataType())
+                .dataVolume(e.getDataVolume())
+                .storageMethod(e.getStorageMethod())
+                .securityLevel(e.getSecurityLevel())
+                .isInBalanceSheet(e.getIsInBalanceSheet() != null && e.getIsInBalanceSheet() ? "是" : "否")
+                .balanceSheetValue(e.getBalanceSheetValue())
+                .usageScenario(e.getUsageScenario())
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), DataAssetDetailRow.class, displayName, displayName);
+            writeAndUpload(task, rows, DataAssetDetailRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
     }
 
     private void exportNaturalResourceDetail(ExportTask task) {
-        // TODO: Phase 6 — query from natural resource table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<NaturalResource> qw = new LambdaQueryWrapper<NaturalResource>()
+                .eq(NaturalResource::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(NaturalResource::getOrgId, orgId);
+        }
+        List<NaturalResource> list = naturalResourceMapper.selectList(qw);
+        List<NaturalResourceDetailRow> rows = list.stream()
+            .map(e -> NaturalResourceDetailRow.builder()
+                .resourceName(e.getResourceName())
+                .resourceType(e.getResourceType())
+                .location(e.getLocation())
+                .areaOrReserve(e.getAreaOrReserve())
+                .unit(e.getUnit())
+                .certificateNo(e.getCertificateNo())
+                .acquisitionMethod(e.getAcquisitionMethod())
+                .usefulLifeYears(e.getUsefulLifeYears())
+                .bookValue(e.getBookValue())
+                .appraisedValue(e.getAppraisedValue())
+                .isDeveloped(e.getIsDeveloped() != null && e.getIsDeveloped() ? "是" : "否")
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), NaturalResourceDetailRow.class, displayName, displayName);
+            writeAndUpload(task, rows, NaturalResourceDetailRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
     }
 
     private void exportMonetaryFundDetail(ExportTask task) {
-        // TODO: Phase 6 — query from monetary fund table
+        Long orgId = parseOrgId(task.getParams());
+        LambdaQueryWrapper<CashAccount> qw = new LambdaQueryWrapper<CashAccount>()
+                .eq(CashAccount::getTenantId, task.getTenantId());
+        if (orgId != null) {
+            qw.eq(CashAccount::getOrgId, orgId);
+        }
+        List<CashAccount> list = cashAccountMapper.selectList(qw);
+        List<MonetaryFundDetailRow> rows = list.stream()
+            .map(e -> MonetaryFundDetailRow.builder()
+                .accountName(e.getAccountName())
+                .bankName(e.getBankName())
+                .accountNo(e.getAccountNo())
+                .currency(e.getCurrency())
+                .bookBalance(e.getBookBalance())
+                .statementBalance(e.getStatementBalance())
+                .diffAmount(e.getDiffAmount())
+                .diffReason(e.getDiffReason())
+                .accountType(e.getAccountType())
+                .isRestricted(e.getIsRestricted() != null && e.getIsRestricted() ? "是" : "否")
+                .restrictedAmount(e.getRestrictedAmount())
+                .reconciliationDate(e.getReconciliationDate())
+                .remark(e.getRemark())
+                .build())
+            .collect(Collectors.toList());
         String displayName = ExportType.label(task.getExportType());
         try {
-            writeAndUpload(task, List.of(), MonetaryFundDetailRow.class, displayName, displayName);
+            writeAndUpload(task, rows, MonetaryFundDetailRow.class, displayName, displayName);
         } catch (Exception e) {
             throw new RuntimeException("导出" + displayName + "失败", e);
         }
