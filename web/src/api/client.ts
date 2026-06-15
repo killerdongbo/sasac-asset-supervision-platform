@@ -16,6 +16,10 @@ client.interceptors.request.use((config) => {
 // Response interceptor: unwrap ApiResponse, handle 401/403 -> redirect login
 client.interceptors.response.use(
   (response) => {
+    // Bypass unwrapping for blob downloads (responseType: 'blob')
+    if (response.config.responseType === 'blob') {
+      return response.data
+    }
     const data = response.data
     if (!data.success) {
       ElMessage.error(data.error || '请求失败')
