@@ -48,7 +48,7 @@ public class ExportController {
         if (task == null) {
             throw new BusinessException("导出任务不存在");
         }
-        if (!"COMPLETED".equals(task.getStatus())) {
+        if (!ExportService.STATUS_COMPLETED.equals(task.getStatus())) {
             throw new BusinessException("导出任务尚未完成");
         }
         String downloadUrl = exportService.generateDownloadUrl(id);

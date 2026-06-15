@@ -24,7 +24,9 @@ import io.minio.PutObjectArgs;
 import io.minio.http.Method;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,6 +45,13 @@ import java.util.stream.Collectors;
 public class ExportService {
 
     private static final int MAX_CONCURRENT_PER_TENANT = 5;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    /** Export task status constants. */
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_PROCESSING = "PROCESSING";
+    public static final String STATUS_COMPLETED = "COMPLETED";
+    public static final String STATUS_FAILED = "FAILED";
 
     private final ExportTaskMapper exportTaskMapper;
     private final MinioClient minioClient;
@@ -48,6 +59,10 @@ public class ExportService {
     private final InventoryTaskMapper inventoryTaskMapper;
     private final InventoryRecordMapper inventoryRecordMapper;
     private final DepreciationMapper depreciationMapper;
+
+    @Autowired
+    @Lazy
+    private ExportService self;
 
     @Value("${minio.bucket:sasac-assets}")
     private String bucket;
@@ -70,7 +85,7 @@ public class ExportService {
         long runningCount = exportTaskMapper.selectCount(
                 new LambdaQueryWrapper<ExportTask>()
                         .eq(ExportTask::getTenantId, tenantId)
-                        .in(ExportTask::getStatus, "PENDING", "PROCESSING")
+                        .in(ExportTask::getStatus, STATUS_PENDING, STATUS_PROCESSING)
         );
         if (runningCount >= MAX_CONCURRENT_PER_TENANT) {
             throw new BusinessException("当前有太多导出任务正在执行，请稍后再试");
@@ -80,20 +95,23 @@ public class ExportService {
         task.setTenantId(tenantId);
         task.setExportType(dto.getExportType());
         task.setParams(dto.getParams());
-        task.setStatus("PENDING");
+        task.setStatus(STATUS_PENDING);
         task.setCreatedBy(userId);
         exportTaskMapper.insert(task);
 
-        executeExportAsync(task.getId());
+        self.executeExportAsync(task.getId());
         return task;
     }
 
     @Async
     public void executeExportAsync(Long taskId) {
         ExportTask task = exportTaskMapper.selectById(taskId);
-        if (task == null) return;
+        if (task == null) {
+            log.warn("Export task {} not found, async execution skipped", taskId);
+            return;
+        }
 
-        task.setStatus("PROCESSING");
+        task.setStatus(STATUS_PROCESSING);
         exportTaskMapper.updateById(task);
 
         try {
@@ -105,11 +123,11 @@ public class ExportService {
                 default -> throw new BusinessException("不支持的导出类型: " + exportType);
             }
 
-            task.setStatus("COMPLETED");
+            task.setStatus(STATUS_COMPLETED);
             task.setCompletedAt(LocalDateTime.now());
         } catch (Exception e) {
             log.error("Export task {} failed: {}", taskId, e.getMessage(), e);
-            task.setStatus("FAILED");
+            task.setStatus(STATUS_FAILED);
             task.setErrorMessage(e.getMessage());
             task.setCompletedAt(LocalDateTime.now());
         }
@@ -135,7 +153,8 @@ public class ExportService {
     private void exportAssetList(ExportTask task) throws Exception {
         Long orgId = parseOrgId(task.getParams());
         LambdaQueryWrapper<Asset> qw = new LambdaQueryWrapper<Asset>()
-                .eq(Asset::getTenantId, task.getTenantId());
+                .eq(Asset::getTenantId, task.getTenantId())
+                .orderByAsc(Asset::getCategory);
         if (orgId != null) {
             qw.eq(Asset::getOrgId, orgId);
         }
@@ -154,18 +173,7 @@ public class ExportService {
             return r;
         }).collect(Collectors.toList());
 
-        String fileName = "资产台账_" + System.currentTimeMillis() + ".xlsx";
-        File tempFile = File.createTempFile("export_", ".xlsx");
-        try {
-            EasyExcel.write(tempFile, AssetExportRow.class)
-                    .sheet("资产台账")
-                    .doWrite(rows);
-            uploadToMinio(task, tempFile, fileName);
-            task.setFileName(fileName);
-            task.setTotalRows(rows.size());
-        } finally {
-            tempFile.delete();
-        }
+        writeAndUpload(task, rows, AssetExportRow.class, "资产台账", "资产台账");
     }
 
     private void exportInventoryReport(ExportTask task) throws Exception {
@@ -173,43 +181,46 @@ public class ExportService {
                 .eq(InventoryTask::getTenantId, task.getTenantId());
         List<InventoryTask> inventoryTasks = inventoryTaskMapper.selectList(qw);
 
-        List<InventoryReportRow> rows = inventoryTasks.stream().map(t -> {
-            int recordCount = inventoryRecordMapper.selectCount(
-                    new LambdaQueryWrapper<InventoryRecord>()
-                            .eq(InventoryRecord::getTaskId, t.getId())
-            ).intValue();
+        // Batch-count records per task to avoid N+1
+        List<Long> taskIds = inventoryTasks.stream().map(InventoryTask::getId).collect(Collectors.toList());
+        Map<Long, Long> countMap = taskIds.isEmpty() ? Map.of() :
+                inventoryRecordMapper.selectList(
+                        new LambdaQueryWrapper<InventoryRecord>().in(InventoryRecord::getTaskId, taskIds)
+                ).stream()
+                .collect(Collectors.groupingBy(InventoryRecord::getTaskId, Collectors.counting()));
 
+        List<InventoryReportRow> rows = inventoryTasks.stream().map(t -> {
             InventoryReportRow r = new InventoryReportRow();
             r.setTaskName(t.getTaskName());
             r.setStatus(t.getStatus());
             r.setTotalCount(t.getTotalCount());
             r.setCompletedCount(t.getCompletedCount());
             r.setDiffCount(t.getDiffCount());
-            r.setRecordCount(recordCount);
+            r.setRecordCount(countMap.getOrDefault(t.getId(), 0L).intValue());
             return r;
         }).collect(Collectors.toList());
 
-        String fileName = "盘点报告_" + System.currentTimeMillis() + ".xlsx";
-        File tempFile = File.createTempFile("export_", ".xlsx");
-        try {
-            EasyExcel.write(tempFile, InventoryReportRow.class)
-                    .sheet("盘点报告")
-                    .doWrite(rows);
-            uploadToMinio(task, tempFile, fileName);
-            task.setFileName(fileName);
-            task.setTotalRows(rows.size());
-        } finally {
-            tempFile.delete();
-        }
+        writeAndUpload(task, rows, InventoryReportRow.class, "盘点报告", "盘点报告");
     }
 
     private void exportDepreciationList(ExportTask task) throws Exception {
         LambdaQueryWrapper<Depreciation> qw = new LambdaQueryWrapper<Depreciation>()
+                .eq(Depreciation::getTenantId, task.getTenantId())
                 .orderByDesc(Depreciation::getDepreciationDate);
         List<Depreciation> depreciations = depreciationMapper.selectList(qw);
 
+        // Batch-query assets to avoid N+1
+        List<Long> assetIds = depreciations.stream()
+                .map(Depreciation::getAssetId)
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, Asset> assetMap = assetIds.isEmpty() ? Map.of() :
+                assetMapper.selectBatchIds(assetIds).stream()
+                        .collect(Collectors.toMap(Asset::getId, Function.identity()));
+
         List<DepreciationRow> rows = depreciations.stream().map(d -> {
-            Asset asset = assetMapper.selectById(d.getAssetId());
+            Asset asset = assetMap.get(d.getAssetId());
 
             DepreciationRow r = new DepreciationRow();
             r.setAssetName(asset != null ? asset.getName() : "未知资产");
@@ -222,18 +233,7 @@ public class ExportService {
             return r;
         }).collect(Collectors.toList());
 
-        String fileName = "折旧明细_" + System.currentTimeMillis() + ".xlsx";
-        File tempFile = File.createTempFile("export_", ".xlsx");
-        try {
-            EasyExcel.write(tempFile, DepreciationRow.class)
-                    .sheet("折旧明细")
-                    .doWrite(rows);
-            uploadToMinio(task, tempFile, fileName);
-            task.setFileName(fileName);
-            task.setTotalRows(rows.size());
-        } finally {
-            tempFile.delete();
-        }
+        writeAndUpload(task, rows, DepreciationRow.class, "折旧明细", "折旧明细");
     }
 
     // ========== MinIO helpers ==========
@@ -273,11 +273,28 @@ public class ExportService {
     private Long parseOrgId(String params) {
         if (params == null || params.isBlank()) return null;
         try {
-            var node = new ObjectMapper().readTree(params);
+            var node = OBJECT_MAPPER.readTree(params);
             return node.has("orgId") ? node.get("orgId").asLong() : null;
         } catch (Exception e) {
             log.warn("Failed to parse orgId from params: {}", params);
             return null;
+        }
+    }
+
+    /**
+     * Write Excel rows to a temp file via EasyExcel, upload to MinIO, then clean up.
+     */
+    private <T> void writeAndUpload(ExportTask task, List<T> rows, Class<T> clazz,
+                                     String displayName, String sheetName) throws Exception {
+        String fileName = displayName + "_" + System.currentTimeMillis() + ".xlsx";
+        File tempFile = File.createTempFile("export_", ".xlsx");
+        try {
+            EasyExcel.write(tempFile, clazz).sheet(sheetName).doWrite(rows);
+            uploadToMinio(task, tempFile, fileName);
+            task.setFileName(fileName);
+            task.setTotalRows(rows.size());
+        } finally {
+            tempFile.delete();
         }
     }
 
