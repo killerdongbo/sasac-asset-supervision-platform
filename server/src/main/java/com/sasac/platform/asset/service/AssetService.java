@@ -7,6 +7,7 @@ import com.sasac.platform.asset.dto.AssetQueryDTO;
 import com.sasac.platform.asset.entity.Asset;
 import com.sasac.platform.asset.ledger.entity.AssetChangeLog;
 import com.sasac.platform.asset.ledger.mapper.AssetChangeLogMapper;
+import com.sasac.platform.asset.lifecycle.service.LifecycleEventPublisher;
 import com.sasac.platform.asset.mapper.AssetMapper;
 import com.sasac.platform.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class AssetService {
 
     private final AssetMapper assetMapper;
     private final AssetChangeLogMapper assetChangeLogMapper;
+    private final LifecycleEventPublisher lifecycleEventPublisher;
 
     /**
      * Creates a new asset from the provided DTO.
@@ -62,6 +64,13 @@ public class AssetService {
         }
 
         assetMapper.insert(asset);
+
+        lifecycleEventPublisher.publish(
+                0L, asset.getId(), "STOCK_IN",
+                "资产入库登记：" + asset.getName(),
+                null, "asset", asset.getId(),
+                null, null);
+
         return asset;
     }
 

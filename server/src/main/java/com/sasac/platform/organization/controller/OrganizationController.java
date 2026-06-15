@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for organization tree management.
@@ -29,6 +32,14 @@ public class OrganizationController {
 
     public OrganizationController(OrganizationService organizationService) {
         this.organizationService = organizationService;
+    }
+
+    /**
+     * Lists all organizations.
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<java.util.List<Organization>>> list() {
+        return ResponseEntity.ok(ApiResponse.success(organizationService.listAll()));
     }
 
     /**
@@ -82,6 +93,45 @@ public class OrganizationController {
     public ResponseEntity<ApiResponse<List<Organization>>> getChildren(@PathVariable Long id) {
         List<Organization> children = organizationService.getChildren(id);
         return ResponseEntity.ok(ApiResponse.success(children));
+    }
+
+    /**
+     * Returns the complete organization tree as nested structure (with children).
+     *
+     * @return root organizations with nested children for tree display
+     */
+    @GetMapping("/tree")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getFullTree() {
+        List<Organization> all = organizationService.listAll();
+
+        // Build parentId -> children map
+        Map<Long, List<Map<String, Object>>> childrenMap = new LinkedHashMap<>();
+        List<Map<String, Object>> allNodes = new ArrayList<>();
+
+        for (Organization org : all) {
+            Map<String, Object> node = new LinkedHashMap<>();
+            node.put("id", org.getId().toString());
+            node.put("name", org.getName());
+            node.put("orgType", org.getOrgType());
+            node.put("orgCode", org.getOrgCode());
+            node.put("parentId", org.getParentId() != null ? org.getParentId().toString() : null);
+            node.put("children", new ArrayList<>());
+            allNodes.add(node);
+
+            Long parentId = org.getParentId() != null ? org.getParentId() : 0L;
+            childrenMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(node);
+        }
+
+        // Attach children to parents
+        for (Map<String, Object> node : allNodes) {
+            Long nodeId = Long.valueOf((String) node.get("id"));
+            List<Map<String, Object>> children = childrenMap.getOrDefault(nodeId, List.of());
+            node.put("children", children);
+        }
+
+        // Return root nodes (parentId is null)
+        List<Map<String, Object>> roots = childrenMap.getOrDefault(0L, List.of());
+        return ResponseEntity.ok(ApiResponse.success(roots));
     }
 
     /**

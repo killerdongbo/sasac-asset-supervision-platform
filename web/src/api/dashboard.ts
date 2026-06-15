@@ -16,10 +16,23 @@ export interface TopOrg {
   totalOriginalValue: number
 }
 
+export interface TrendItem {
+  month: string
+  count: number
+}
+
 export function getOverview() {
   return client.get('/dashboard/overview') as Promise<{ data: OverviewData }>
 }
 
 export function getTopOrgs(limit = 10) {
   return client.get('/dashboard/top-orgs', { params: { limit } }) as Promise<{ data: TopOrg[] }>
+}
+
+export function getMonthlyTrend(months = 12) {
+  return client.get('/dashboard/trend', { params: { months } }) as Promise<{ data: TrendItem[] }>
+}
+
+export function getMonthNewCount() {
+  return client.get('/dashboard/month-new') as Promise<{ data: number }>
 }

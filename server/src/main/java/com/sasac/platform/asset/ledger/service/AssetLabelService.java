@@ -17,7 +17,7 @@ import java.util.UUID;
  * <p>
  * Labels use UUID-based codes and track print counts for audit purposes.
  */
-@Service
+@Service("ledgerAssetLabelService")
 @RequiredArgsConstructor
 public class AssetLabelService {
 

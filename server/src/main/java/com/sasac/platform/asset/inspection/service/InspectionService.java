@@ -50,7 +50,9 @@ public class InspectionService {
      */
     public List<InspectionTask> getMyTasks(Long assigneeId) {
         LambdaQueryWrapper<InspectionTask> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(InspectionTask::getAssigneeId, assigneeId);
+        if (assigneeId != null) {
+            wrapper.eq(InspectionTask::getAssigneeId, assigneeId);
+        }
         wrapper.orderByDesc(InspectionTask::getId);
         return inspectionTaskMapper.selectList(wrapper);
     }

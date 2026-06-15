@@ -47,9 +47,10 @@ export interface AssetCreateDTO {
 }
 
 export interface ImportResult {
-  totalCount: number
+  totalRows: number
   successCount: number
-  failedList?: Array<{ row: number; error: string }>
+  errorCount: number
+  errors?: Array<{ row: number; field: string; message: string }>
 }
 
 export function queryAssets(params: AssetQuery) {
@@ -72,12 +73,13 @@ export function deleteAsset(id: string) {
   return client.delete(`/assets/${id}`) as Promise<{ data: null }>
 }
 
-export function importAssets(file: File, orgId: number, tenantId: number) {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('orgId', String(orgId))
-  formData.append('tenantId', String(tenantId))
-  return client.post('/assets/import', formData, {
+export function downloadTemplate() {
+  return client.get('/import/template', { responseType: 'blob' })
+}
+
+export function importAssets(file: File) {
+  const formData = new FormData(); formData.append('file', file)
+  return client.post('/import/assets', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }) as Promise<{ data: ImportResult }>
 }

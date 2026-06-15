@@ -1,5 +1,6 @@
 import client from './client'
 
+// TODO: 流转管理功能的后端 Controller 尚未实现，以下 API 暂不可用
 export function getStockIns(params?: any) { return client.get('/stock-ins', { params }) }
 export function createStockIn(data: any) { return client.post('/stock-ins', data) }
 

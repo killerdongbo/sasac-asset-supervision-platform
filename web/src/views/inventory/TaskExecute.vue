@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getTask, getRecords, createRecord } from '@/api/inventory'
+import { getRecords, createRecord } from '@/api/inventory'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -9,7 +9,12 @@ const task = ref<any>(null)
 const records = ref<any[]>([])
 const form = ref({ assetId: null as number | null, exists: true, actualLocation: '', actualStatus: 'IN_USE', remark: '' })
 
-async function fetch() { const id = Number(route.params.id); task.value = (await getTask(id)).data; records.value = (await getRecords(id)).data || [] }
+async function fetch() {
+  const id = Number(route.params.id)
+  const res = await getRecords(id)
+  task.value = { id, taskName: '盘点任务 #' + id }
+  records.value = res.data || []
+}
 
 async function handleSubmit() {
   await createRecord({ taskId: Number(route.params.id), ...form.value, operatorId: 1 })

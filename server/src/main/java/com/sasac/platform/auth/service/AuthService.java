@@ -5,11 +5,14 @@ import com.sasac.platform.auth.dto.LoginResponse;
 import com.sasac.platform.auth.entity.User;
 import com.sasac.platform.auth.mapper.UserMapper;
 import com.sasac.platform.auth.security.JwtUtil;
+import com.sasac.platform.permission.service.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 /**
  * Authentication service handling user login and JWT token generation.
@@ -22,11 +25,14 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final PermissionService permService;
 
-    public AuthService(UserMapper userMapper, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserMapper userMapper, PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil, PermissionService permService) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.permService = permService;
     }
 
     /**
@@ -64,7 +70,15 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getTenantId());
 
-        log.info("User '{}' logged in successfully", username);
+        // 加载用户权限和角色
+        Set<String> perms = permService.getUserPermissionCodes(user.getId());
+        Set<String> roleCodes = new java.util.HashSet<>();
+        java.util.List<com.sasac.platform.permission.entity.Role> userRoles = permService.getUserRoles(user.getId());
+        for (com.sasac.platform.permission.entity.Role r : userRoles) {
+            roleCodes.add(r.getRoleCode());
+        }
+
+        log.info("User '{}' logged in successfully, perms={}, roles={}", username, perms.size(), roleCodes.size());
 
         return LoginResponse.builder()
                 .token(token)
@@ -74,6 +88,8 @@ public class AuthService {
                 .tenantId(user.getTenantId())
                 .orgId(user.getOrgId())
                 .roleCode(user.getRoleCode())
+                .permissions(perms)
+                .roles(roleCodes)
                 .build();
     }
 }

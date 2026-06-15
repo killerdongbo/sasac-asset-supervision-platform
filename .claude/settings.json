@@ -1,0 +1,34 @@
+{
+  "description": "湛江国资国企一体化数字平台（二期）— 项目配置",
+  "agents": {
+    "architect-architect": {
+      "description": "架构师 — 需求分析、技术选型、生成实施计划",
+      "path": "~/.claude/agents/architect-architect.md"
+    },
+    "builder": {
+      "description": "构建师 — 代码编写、依赖管理、严格执行计划",
+      "path": "~/.claude/agents/builder.md"
+    },
+    "validator": {
+      "description": "验证者 — 测试用例、Bug追踪、质量门禁",
+      "path": "~/.claude/agents/validator.md"
+    },
+    "scribe": {
+      "description": "记录员 — API文档、使用说明、知识沉淀",
+      "path": "~/.claude/agents/scribe.md"
+    }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[Scribe] 检测到文件变更，请确认是否需要更新文档。\""
+          }
+        ]
+      }
+    ]
+  }
+}

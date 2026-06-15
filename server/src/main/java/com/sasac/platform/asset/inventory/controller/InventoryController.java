@@ -50,7 +50,7 @@ public class InventoryController {
      */
     @GetMapping("/inventory-tasks/my")
     public ResponseEntity<ApiResponse<List<InventoryTask>>> getMyTasks(
-            @RequestParam Long assigneeId) {
+            @RequestParam(required = false) Long assigneeId) {
         List<InventoryTask> tasks = inventoryService.getMyTasks(assigneeId);
         return ResponseEntity.ok(ApiResponse.success(tasks));
     }

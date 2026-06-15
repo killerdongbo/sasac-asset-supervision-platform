@@ -11,6 +11,12 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
+      path: '/screen',
+      name: 'DataScreen',
+      component: () => import('@/views/screen/DataScreen.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/',
       component: () => import('@/components/layout/AppLayout.vue'),
       meta: { requiresAuth: true },
@@ -30,6 +36,7 @@ const router = createRouter({
         { path: 'assets/import', name: 'AssetImport', component: () => import('@/views/asset/AssetImport.vue') },
         { path: 'assets/:id', name: 'AssetDetail', component: () => import('@/views/asset/AssetDetail.vue') },
         { path: 'assets/:id/edit', name: 'AssetEdit', component: () => import('@/views/asset/AssetForm.vue') },
+        { path: 'assets/labels', name: 'AssetLabels', component: () => import('@/views/asset/LabelManage.vue') },
 
         // ===== 资产流转管理 =====
         { path: 'stock-ins', name: 'StockInList', component: () => import('@/views/circulation/StockInList.vue') },
@@ -73,6 +80,16 @@ const router = createRouter({
         // ===== 统计报表 =====
         { path: 'statistics/assets', name: 'AssetStatistics', component: () => import('@/views/statistics/AssetStats.vue') },
         { path: 'statistics/depreciation', name: 'DepreciationStatistics', component: () => import('@/views/statistics/DepreciationStats.vue') },
+        { path: 'statistics/group', name: 'GroupStatistics', component: () => import('@/views/statistics/GroupStats.vue') },
+        { path: 'statistics/asset-summary', name: 'AssetSummaryReport', component: () => import('@/views/statistics/AssetSummaryReport.vue') },
+        { path: 'statistics/category', name: 'CategoryReport', component: () => import('@/views/statistics/CategoryReport.vue') },
+        { path: 'statistics/disposal', name: 'DisposalReport', component: () => import('@/views/statistics/DisposalReport.vue') },
+        { path: 'statistics/depreciation-report', name: 'DepreciationReport', component: () => import('@/views/statistics/DepreciationReport.vue') },
+        { path: 'statistics/idle', name: 'IdleReport', component: () => import('@/views/statistics/IdleReport.vue') },
+        { path: 'statistics/rental', name: 'RentalReport', component: () => import('@/views/statistics/RentalReport.vue') },
+
+        // ===== 消息通知 =====
+        { path: 'notifications', name: 'NotificationList', component: () => import('@/views/notification/NotificationList.vue') },
 
         // ===== 审计追溯 =====
         { path: 'audit-logs', name: 'AuditLogList', component: () => import('@/views/audit/LogList.vue') },
@@ -82,7 +99,16 @@ const router = createRouter({
         { path: 'users', name: 'UserManage', component: () => import('@/views/system/UserManage.vue') },
         { path: 'roles', name: 'RoleManage', component: () => import('@/views/system/RoleManage.vue') },
         { path: 'organizations', name: 'OrgManage', component: () => import('@/views/system/OrgManage.vue') },
-        { path: 'dicts', name: 'DictManage', component: () => import('@/views/system/DictManage.vue') }
+        { path: 'dicts', name: 'DictManage', component: () => import('@/views/system/DictManage.vue') },
+        { path: 'tenants', name: 'TenantManage', component: () => import('@/views/tenant/TenantManage.vue') },
+
+        // ===== 报价分析 =====
+        { path: 'quotation/inquiries', name: 'InquiryList', component: () => import('@/views/quotation/InquiryList.vue') },
+        { path: 'quotation/compare/:id', name: 'QuotationCompare', component: () => import('@/views/quotation/QuotationCompare.vue') },
+        { path: 'quotation/price-trend', name: 'PriceTrend', component: () => import('@/views/quotation/PriceTrend.vue') },
+
+        // ===== 导出中心 =====
+        { path: 'exports', name: 'ExportCenter', component: () => import('@/views/export/ExportCenter.vue') }
       ]
     }
   ]

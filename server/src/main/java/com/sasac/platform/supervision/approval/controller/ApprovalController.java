@@ -1,25 +1,16 @@
 package com.sasac.platform.supervision.approval.controller;
 
 import com.sasac.platform.common.response.ApiResponse;
-import com.sasac.platform.supervision.approval.dto.ApprovalActionRequest;
-import com.sasac.platform.supervision.approval.dto.ApprovalStartRequest;
-import com.sasac.platform.supervision.approval.entity.ApprovalDef;
-import com.sasac.platform.supervision.approval.entity.ApprovalInstance;
-import com.sasac.platform.supervision.approval.entity.ApprovalNode;
+import com.sasac.platform.supervision.approval.dto.*;
+import com.sasac.platform.supervision.approval.entity.*;
 import com.sasac.platform.supervision.approval.service.ApprovalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for configurable approval workflow operations.
@@ -114,14 +105,78 @@ public class ApprovalController {
 
     /**
      * Retrieves approval instances submitted by a specific user.
-     *
-     * @param submitterId the submitter user ID
-     * @return API response with the list of instances
      */
     @GetMapping("/approval-instances/my-requests")
     public ResponseEntity<ApiResponse<List<ApprovalInstance>>> getMyRequests(
             @RequestParam Long submitterId) {
-        List<ApprovalInstance> instances = approvalService.getMyRequests(submitterId);
-        return ResponseEntity.ok(ApiResponse.success(instances));
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getMyRequests(submitterId)));
+    }
+
+    /** Get instance detail */
+    @GetMapping("/approval-instances/{id}")
+    public ResponseEntity<ApiResponse<ApprovalInstance>> getInstance(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getInstance(id)));
+    }
+
+    /** Get node list for a definition */
+    @GetMapping("/approval-defs/{defId}/nodes")
+    public ResponseEntity<ApiResponse<List<ApprovalNode>>> getNodes(@PathVariable Long defId) {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getNodesByDefId(defId)));
+    }
+
+    /** Update approval node */
+    @PutMapping("/approval-defs/{defId}/nodes/{nodeId}")
+    public ResponseEntity<ApiResponse<ApprovalNode>> updateNode(
+            @PathVariable Long defId, @PathVariable Long nodeId, @RequestBody ApprovalNode node) {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.updateNode(nodeId, node)));
+    }
+
+    /** Delete approval node */
+    @DeleteMapping("/approval-defs/{defId}/nodes/{nodeId}")
+    public ResponseEntity<ApiResponse<Void>> deleteNode(
+            @PathVariable Long defId, @PathVariable Long nodeId) {
+        approvalService.deleteNode(nodeId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    /** Get def detail */
+    @GetMapping("/approval-defs/{defId}")
+    public ResponseEntity<ApiResponse<ApprovalDef>> getDef(@PathVariable Long defId) {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getDef(defId)));
+    }
+
+    // ---- 加签 (Add Sign) ----
+
+    @PostMapping("/approval-instances/{id}/add-sign")
+    public ResponseEntity<ApiResponse<Void>> addSign(@PathVariable Long id,
+                                                      @RequestBody Map<String, Object> body) {
+        approvalService.addSign(
+                id,
+                Long.parseLong(body.get("approverId").toString()),
+                Long.parseLong(body.get("addSignUserId").toString()),
+                (String) body.get("addSignUserName"),
+                (String) body.get("reason"));
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PutMapping("/approval-add-signs/{addSignId}/approve")
+    public ResponseEntity<ApiResponse<Void>> addSignApprove(
+            @PathVariable Long addSignId, @RequestBody Map<String, Object> body) {
+        boolean approved = Boolean.TRUE.equals(body.get("approved"));
+        String remark = (String) body.getOrDefault("remark", "");
+        approvalService.addSignApprove(addSignId, approved, remark);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/approval-add-signs/{addSignId}")
+    public ResponseEntity<ApiResponse<Void>> cancelAddSign(@PathVariable Long addSignId) {
+        approvalService.cancelAddSign(addSignId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @GetMapping("/approval-instances/{id}/add-signs")
+    public ResponseEntity<ApiResponse<List<ApprovalAddSign>>> getAddSigns(
+            @PathVariable Long id, @RequestParam Integer nodeOrder) {
+        return ResponseEntity.ok(ApiResponse.success(approvalService.getAddSigns(id, nodeOrder)));
     }
 }

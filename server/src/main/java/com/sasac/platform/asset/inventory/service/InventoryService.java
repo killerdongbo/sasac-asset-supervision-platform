@@ -55,7 +55,9 @@ public class InventoryService {
      */
     public List<InventoryTask> getMyTasks(Long assigneeId) {
         LambdaQueryWrapper<InventoryTask> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(InventoryTask::getAssigneeId, assigneeId);
+        if (assigneeId != null) {
+            wrapper.eq(InventoryTask::getAssigneeId, assigneeId);
+        }
         wrapper.orderByDesc(InventoryTask::getId);
         return inventoryTaskMapper.selectList(wrapper);
     }

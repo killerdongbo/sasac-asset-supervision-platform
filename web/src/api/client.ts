@@ -13,7 +13,7 @@ client.interceptors.request.use((config) => {
   return config
 })
 
-// Response interceptor: unwrap ApiResponse, handle 401 -> redirect login
+// Response interceptor: unwrap ApiResponse, handle 401/403 -> redirect login
 client.interceptors.response.use(
   (response) => {
     const data = response.data
@@ -24,10 +24,11 @@ client.interceptors.response.use(
     return data
   },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.clear()
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      ;['token', 'tenantId', 'orgId', 'userInfo'].forEach(k => localStorage.removeItem(k))
       router.push('/login')
-      ElMessage.error('登录已过期，请重新登录')
+      const msg = error.response?.status === 401 ? '登录已过期，请重新登录' : '无访问权限，请重新登录'
+      ElMessage.error(msg)
     } else {
       ElMessage.error(error.response?.data?.error || '网络错误')
     }

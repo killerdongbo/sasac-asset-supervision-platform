@@ -1,5 +1,6 @@
 import client from './client'
 
+// TODO: 折旧管理功能的后端 Controller 尚未实现，以下 API 暂不可用
 export function getDepreciationRecords(params?: any) { return client.get('/depreciation-records', { params }) }
 export function runDepreciation(assetId: number) { return client.post(`/assets/${assetId}/depreciate`) }
 export function confirmDepreciation(id: number) { return client.put(`/depreciation-records/${id}/confirm`) }

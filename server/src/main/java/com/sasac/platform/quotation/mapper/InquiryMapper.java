@@ -1,0 +1,9 @@
+package com.sasac.platform.quotation.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.sasac.platform.quotation.entity.Inquiry;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface InquiryMapper extends BaseMapper<Inquiry> {
+}

@@ -1,0 +1,1 @@
+import{k as n}from"./index-BekrrJG4.js";function r(t){return n.get("/notifications",{params:t})}function o(t){return n.get("/notifications/unread-count",{params:{userId:t}})}function e(t,a){return n.put(`/notifications/${t}/read`,null,{params:{userId:a}})}function u(t){return n.put("/notifications/read-all",null,{params:{userId:t}})}export{e as a,o as g,r as l,u as m};

@@ -60,6 +60,15 @@ public class PurchaseService {
     }
 
     /**
+     * Returns all purchase acceptance records (unpaginated).
+     *
+     * @return list of all acceptance records
+     */
+    public List<PurchaseAcceptance> findAllAcceptances() {
+        return purchaseAcceptanceMapper.selectList(null);
+    }
+
+    /**
      * Accepts or rejects a purchase request with the acceptance result.
      * <p>
      * When passed is true the request status becomes ACCEPTED and a

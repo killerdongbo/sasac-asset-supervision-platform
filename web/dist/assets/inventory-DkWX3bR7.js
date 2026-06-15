@@ -1,0 +1,1 @@
+import{k as r}from"./index-BekrrJG4.js";function n(t){return r.get("/inventory-tasks/my",{params:t})}function s(t){return r.post("/inventory-tasks",t)}function o(t){return r.get(`/inventory-tasks/${t}/records`)}function a(t){return r.post("/inventory-records",t)}export{o as a,a as b,s as c,n as g};

@@ -5,6 +5,7 @@ import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
+import { vPermission } from './directives/permission'
 
 const app = createApp(App)
 
@@ -13,6 +14,9 @@ app.use(pinia)
 // router must come after pinia because the route guard uses the user store
 app.use(router)
 app.use(ElementPlus)
+
+// Register v-permission directive
+app.directive('permission', vPermission)
 
 // Register all Element Plus icons globally
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

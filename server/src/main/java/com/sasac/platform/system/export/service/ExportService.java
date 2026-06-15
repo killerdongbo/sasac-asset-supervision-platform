@@ -285,7 +285,6 @@ public class ExportService {
 
     private void exportDepreciationList(ExportTask task) throws Exception {
         LambdaQueryWrapper<Depreciation> qw = new LambdaQueryWrapper<Depreciation>()
-                .eq(Depreciation::getTenantId, task.getTenantId())
                 .orderByDesc(Depreciation::getDepreciationDate);
         List<Depreciation> depreciations = depreciationMapper.selectList(qw);
 

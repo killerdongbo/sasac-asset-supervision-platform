@@ -46,4 +46,22 @@ public class ApprovalNode extends BaseEntity {
      * Timeout in hours for this approval node. 0 means no timeout.
      */
     private Integer timeoutHours;
+
+    /** SINGLE / COUNTER_SIGN / OR_SIGN */
+    private String approveMode = "SINGLE";
+
+    /** Whether to allow adding approvers dynamically */
+    private Boolean allowAddSign = true;
+
+    /** Timeout action: ESCALATE / NOTIFY / AUTO_APPROVE / AUTO_REJECT */
+    private String timeoutAction = "ESCALATE";
+
+    /** Condition type: AMOUNT_GT / AMOUNT_LT / BIZ_TYPE */
+    private String conditionType;
+
+    /** Condition value string */
+    private String conditionValue;
+
+    /** Target role for escalation when timeout */
+    private String escalateRole;
 }

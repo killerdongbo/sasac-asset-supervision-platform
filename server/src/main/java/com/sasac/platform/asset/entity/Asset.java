@@ -149,4 +149,12 @@ public class Asset extends BaseEntity {
      * Additional remarks.
      */
     private String remark;
+
+    private String labelStatus = "UNPRINTED";
+
+    private Integer printCount = 0;
+
+    private String qrContent;
+
+    private java.time.LocalDateTime lastPrintTime;
 }

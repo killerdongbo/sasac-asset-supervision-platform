@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getTask, getRecords, createRecord, completeTask } from '@/api/inspection'
+import { getMyTasks, getRecords, createRecord, completeTask } from '@/api/inspection'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute(); const router = useRouter()
@@ -10,7 +10,10 @@ const records = ref<any[]>([])
 const form = ref({ assetId: null as number | null, isNormal: true, actualLocation: '', actualStatus: 'IN_USE', anomalyType: '', description: '' })
 
 async function fetch() {
-  const id = Number(route.params.id); task.value = (await getTask(id)).data; records.value = (await getRecords(id)).data || []
+  const id = Number(route.params.id)
+  const [recordsRes, tasksRes] = await Promise.all([getRecords(id), getMyTasks()])
+  task.value = (tasksRes.data || []).find((t: any) => t.id === id) || null
+  records.value = recordsRes.data || []
 }
 
 async function handleSubmit() {

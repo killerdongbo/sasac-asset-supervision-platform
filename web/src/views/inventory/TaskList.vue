@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getTasks, getMyTasks, createTask } from '@/api/inventory'
+import { getMyTasks, createTask } from '@/api/inventory'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -11,7 +11,7 @@ const tab = ref('all')
 const dialogVisible = ref(false)
 const form = ref({ taskName: '', assigneeId: null as number | null, scopeType: 'ORG', scopeValue: '', startDate: '', endDate: '' })
 
-async function fetch() { loading.value = true; try { const res = tab.value === 'my' ? await getMyTasks() : await getTasks(); list.value = res.data || [] } finally { loading.value = false } }
+async function fetch() { loading.value = true; try { const res = await getMyTasks(); list.value = res.data || [] } finally { loading.value = false } }
 async function handleCreate() { await createTask(form.value); ElMessage.success('盘点任务已创建'); dialogVisible.value = false; fetch() }
 
 onMounted(fetch)

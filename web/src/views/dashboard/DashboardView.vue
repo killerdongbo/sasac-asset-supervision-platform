@@ -16,34 +16,40 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-label">资产净值</div>
-          <div class="stat-value">{{ formatLargeCurrency(overview.totalCurrentValue) }}</div>
+          <div class="stat-label">本月新增</div>
+          <div class="stat-value highlight">{{ monthNew ?? '-' }}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-label">平均折旧率</div>
-          <div class="stat-value">{{ formatPercent(overview.avgDepreciationRate) }}</div>
+          <div class="stat-label">资产净值</div>
+          <div class="stat-value">{{ formatLargeCurrency(overview.totalCurrentValue) }}</div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- Charts row -->
+    <!-- Charts row 1: category + status -->
     <el-row :gutter="20" class="chart-row">
       <el-col :span="12">
         <el-card shadow="hover" class="chart-card">
-          <template #header>
-            <span class="card-title">资产分类分布</span>
-          </template>
+          <template #header><span class="card-title">资产分类分布</span></template>
           <div ref="categoryChartRef" class="chart-container"></div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card shadow="hover" class="chart-card">
-          <template #header>
-            <span class="card-title">资产状态分布</span>
-          </template>
+          <template #header><span class="card-title">资产状态分布</span></template>
           <div ref="statusChartRef" class="chart-container"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- Charts row 2: trend -->
+    <el-row :gutter="20" class="chart-row">
+      <el-col :span="24">
+        <el-card shadow="hover" class="chart-card">
+          <template #header><span class="card-title">近12月资产新增趋势</span></template>
+          <div ref="trendChartRef" class="chart-container"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -53,8 +59,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
-import { getOverview } from '@/api/dashboard'
-import type { OverviewData } from '@/api/dashboard'
+import { getOverview, getMonthlyTrend, getMonthNewCount } from '@/api/dashboard'
+import type { OverviewData, TrendItem } from '@/api/dashboard'
 
 const overview = reactive<OverviewData>({
   totalAssets: 0,
@@ -65,11 +71,16 @@ const overview = reactive<OverviewData>({
   statusDistribution: []
 })
 
+const monthNew = ref<number | null>(null)
+const trendData = ref<TrendItem[]>([])
+
 const categoryChartRef = ref<HTMLDivElement | null>(null)
 const statusChartRef = ref<HTMLDivElement | null>(null)
+const trendChartRef = ref<HTMLDivElement | null>(null)
 
 let categoryChart: echarts.ECharts | null = null
 let statusChart: echarts.ECharts | null = null
+let trendChart: echarts.ECharts | null = null
 
 const categoryColorMap: Record<string, string> = {
   LAND: '#5470c6',
@@ -90,18 +101,9 @@ const statusColorMap: Record<string, string> = {
 
 function formatLargeCurrency(value: number | undefined | null): string {
   if (value == null) return '-'
-  if (value >= 1e8) {
-    return (value / 1e8).toFixed(2) + '亿'
-  }
-  if (value >= 1e4) {
-    return (value / 1e4).toFixed(2) + '万'
-  }
+  if (value >= 1e8) return (value / 1e8).toFixed(2) + '亿'
+  if (value >= 1e4) return (value / 1e4).toFixed(2) + '万'
   return value.toLocaleString('zh-CN', { style: 'currency', currency: 'CNY' })
-}
-
-function formatPercent(value: number | undefined | null): string {
-  if (value == null) return '-'
-  return (value * 100).toFixed(2) + '%'
 }
 
 function buildCategoryMap(items: Array<{ name: string; value: number }>): Record<string, string> {
@@ -141,100 +143,79 @@ function initCharts() {
   const categoryMap = buildCategoryMap(overview.categoryDistribution)
   const statusMap = buildStatusMap(overview.statusDistribution)
 
-  // Category distribution pie chart
   categoryChart = echarts.init(categoryChartRef.value)
   categoryChart.setOption({
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)'
-    },
-    legend: {
-      bottom: 0,
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { bottom: 0 },
+    series: [{
+      type: 'pie', radius: ['40%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: (p: any) => `${p.name}\n${p.percent.toFixed(1)}%` },
       data: overview.categoryDistribution.map((item) => ({
-        name: categoryMap[item.name] || item.name
+        value: item.value,
+        name: categoryMap[item.name] || item.name,
+        itemStyle: { color: categoryColorMap[item.name] || '#999' }
       }))
-    },
-    series: [
-      {
-        type: 'pie',
-        radius: ['40%', '65%'],
-        center: ['50%', '45%'],
-        avoidLabelOverlap: true,
-        itemStyle: {
-          borderRadius: 6,
-          borderColor: '#fff',
-          borderWidth: 2
-        },
-        label: {
-          show: true,
-          formatter: (params: { name: string; percent: number }) =>
-            `${params.name}\n${params.percent.toFixed(1)}%`
-        },
-        emphasis: {
-          label: { show: true, fontSize: 14, fontWeight: 'bold' }
-        },
-        data: overview.categoryDistribution.map((item) => ({
-          value: item.value,
-          name: categoryMap[item.name] || item.name,
-          itemStyle: { color: categoryColorMap[item.name] || '#999' }
-        }))
-      }
-    ]
+    }]
   })
 
-  // Status distribution pie chart
   statusChart = echarts.init(statusChartRef.value)
   statusChart.setOption({
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)'
-    },
-    legend: {
-      bottom: 0,
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { bottom: 0 },
+    series: [{
+      type: 'pie', radius: ['40%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: (p: any) => `${p.name}\n${p.percent.toFixed(1)}%` },
       data: overview.statusDistribution.map((item) => ({
-        name: statusMap[item.name] || item.name
+        value: item.value,
+        name: statusMap[item.name] || item.name,
+        itemStyle: { color: statusColorMap[item.name] || '#999' }
       }))
+    }]
+  })
+
+  initTrendChart()
+}
+
+function initTrendChart() {
+  if (!trendChartRef.value || trendData.value.length === 0) return
+
+  trendChart = echarts.init(trendChartRef.value)
+  trendChart.setOption({
+    tooltip: { trigger: 'axis' },
+    grid: { left: 60, right: 30, top: 20, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: trendData.value.map(t => t.month),
+      axisLabel: { formatter: (v: string) => v.substring(5) }
     },
-    series: [
-      {
-        type: 'pie',
-        radius: ['40%', '65%'],
-        center: ['50%', '45%'],
-        avoidLabelOverlap: true,
-        itemStyle: {
-          borderRadius: 6,
-          borderColor: '#fff',
-          borderWidth: 2
-        },
-        label: {
-          show: true,
-          formatter: (params: { name: string; percent: number }) =>
-            `${params.name}\n${params.percent.toFixed(1)}%`
-        },
-        emphasis: {
-          label: { show: true, fontSize: 14, fontWeight: 'bold' }
-        },
-        data: overview.statusDistribution.map((item) => ({
-          value: item.value,
-          name: statusMap[item.name] || item.name,
-          itemStyle: { color: statusColorMap[item.name] || '#999' }
-        }))
-      }
-    ]
+    yAxis: { type: 'value', name: '新增数量', minInterval: 1 },
+    series: [{
+      type: 'line', smooth: true,
+      data: trendData.value.map(t => t.count),
+      areaStyle: { opacity: 0.15 },
+      itemStyle: { color: '#409eff' }
+    }]
   })
 }
 
 function handleResize() {
   categoryChart?.resize()
   statusChart?.resize()
+  trendChart?.resize()
 }
 
 async function fetchData() {
   try {
-    const response = await getOverview()
-    if (response.data) {
-      Object.assign(overview, response.data)
-    }
+    const [overviewRes, trendRes, monthRes] = await Promise.all([
+      getOverview(),
+      getMonthlyTrend(12),
+      getMonthNewCount()
+    ])
+    if (overviewRes.data) Object.assign(overview, overviewRes.data)
+    trendData.value = trendRes.data || []
+    monthNew.value = monthRes.data ?? 0
   } catch {
     // Error handled by interceptor
   }
@@ -251,6 +232,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   categoryChart?.dispose()
   statusChart?.dispose()
+  trendChart?.dispose()
 })
 </script>
 
@@ -278,6 +260,10 @@ onBeforeUnmount(() => {
   font-size: 28px;
   font-weight: 700;
   color: #303133;
+}
+
+.stat-value.highlight {
+  color: #409eff;
 }
 
 .chart-row {

@@ -41,3 +41,8 @@ minio:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
+
+wx:
+  miniapp:
+    appid: ${WX_MINIAPP_APPID:}
+    secret: ${WX_MINIAPP_SECRET:}

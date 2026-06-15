@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sasac.platform.asset.entity.Asset;
 import com.sasac.platform.asset.mapper.AssetMapper;
 import com.sasac.platform.common.exception.BusinessException;
+import com.sasac.platform.organization.entity.Organization;
+import com.sasac.platform.organization.mapper.OrganizationMapper;
 import com.sasac.platform.report.entity.Report;
 import com.sasac.platform.report.mapper.ReportMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +32,7 @@ public class ReportService {
 
     private final ReportMapper reportMapper;
     private final AssetMapper assetMapper;
+    private final OrganizationMapper organizationMapper;
     private final ObjectMapper objectMapper;
 
     /**
@@ -110,67 +114,90 @@ public class ReportService {
     }
 
     /**
-     * Builds the aggregated report data from asset records.
-     *
-     * @param reportType the type of report
-     * @param orgId      the organization ID
-     * @return a Map containing aggregated report data
+     * Collects all descendant organization IDs recursively.
+     */
+    private List<Long> collectSubOrgIds(Long parentId) {
+        List<Organization> children = organizationMapper.selectList(
+                new LambdaQueryWrapper<Organization>()
+                        .eq(Organization::getParentId, parentId)
+                        .eq(Organization::getStatus, 1)
+        );
+        List<Long> ids = new ArrayList<>();
+        for (Organization child : children) {
+            ids.add(child.getId());
+            ids.addAll(collectSubOrgIds(child.getId()));
+        }
+        return ids;
+    }
+
+    /**
+     * Builds the aggregated report data from asset records,
+     * including assets from sub-organizations recursively.
      */
     private Map<String, Object> buildReportData(String reportType, Long orgId) {
-        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Asset::getOrgId, orgId);
+        // Collect all org IDs including sub-organizations
+        List<Long> allOrgIds = new ArrayList<>(collectSubOrgIds(orgId));
+        allOrgIds.add(orgId);
 
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Asset::getOrgId, allOrgIds);
         List<Asset> assets = assetMapper.selectList(wrapper);
 
-        Map<String, Object> data = new LinkedHashMap<>();
-        data.put("reportType", reportType);
-        data.put("orgId", orgId);
-        data.put("generatedAt", LocalDateTime.now().toString());
-
-        // Total asset count
-        data.put("totalAssets", assets.size());
-
-        // Financial aggregates
+        // Total counts
+        int totalAssets = assets.size();
         BigDecimal totalOriginalValue = assets.stream()
                 .map(a -> a.getOriginalValue() != null ? a.getOriginalValue() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        data.put("totalOriginalValue", totalOriginalValue);
-
         BigDecimal totalCurrentValue = assets.stream()
                 .map(a -> a.getCurrentValue() != null ? a.getCurrentValue() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        data.put("totalCurrentValue", totalCurrentValue);
-
-        BigDecimal totalAccumulatedDepreciation = assets.stream()
+        BigDecimal totalDepreciation = assets.stream()
                 .map(a -> a.getAccumulatedDepreciation() != null ? a.getAccumulatedDepreciation() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        data.put("totalAccumulatedDepreciation", totalAccumulatedDepreciation);
 
-        // Category summary: group by category, count
-        Map<String, Long> categoryCount = assets.stream()
-                .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
-        List<Map<String, Object>> categorySummary = categoryCount.entrySet().stream()
+        // Average depreciation rate
+        BigDecimal avgDepreciationRate = totalOriginalValue.compareTo(BigDecimal.ZERO) > 0
+                ? totalDepreciation.divide(totalOriginalValue, 4, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // Distinct org count
+        long orgCount = assets.stream().map(Asset::getOrgId).distinct().count();
+
+        // Category distribution with financials
+        Map<String, List<Asset>> byCategory = assets.stream()
+                .collect(Collectors.groupingBy(a -> a.getCategory() != null ? a.getCategory() : "未知"));
+        List<Map<String, Object>> categoryDistribution = byCategory.entrySet().stream()
                 .map(entry -> {
+                    BigDecimal catOrig = entry.getValue().stream()
+                            .map(a -> a.getOriginalValue() != null ? a.getOriginalValue() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal catCurr = entry.getValue().stream()
+                            .map(a -> a.getCurrentValue() != null ? a.getCurrentValue() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
                     Map<String, Object> item = new LinkedHashMap<>();
-                    item.put("category", entry.getKey());
-                    item.put("count", entry.getValue());
+                    item.put("name", entry.getKey());
+                    item.put("value", entry.getValue().size());
+                    item.put("totalOriginalValue", catOrig);
+                    item.put("totalCurrentValue", catCurr);
                     return item;
                 })
                 .collect(Collectors.toList());
-        data.put("categorySummary", categorySummary);
 
-        // Status summary: group by useStatus, count
-        Map<String, Long> statusCount = assets.stream()
-                .collect(Collectors.groupingBy(Asset::getUseStatus, Collectors.counting()));
-        List<Map<String, Object>> statusSummary = statusCount.entrySet().stream()
-                .map(entry -> {
-                    Map<String, Object> item = new LinkedHashMap<>();
-                    item.put("status", entry.getKey());
-                    item.put("count", entry.getValue());
-                    return item;
-                })
-                .collect(Collectors.toList());
-        data.put("statusSummary", statusSummary);
+        // Build the summaryData wrapper that the frontend expects
+        Map<String, Object> summaryData = new LinkedHashMap<>();
+        summaryData.put("totalAssets", totalAssets);
+        summaryData.put("totalOriginalValue", totalOriginalValue);
+        summaryData.put("totalCurrentValue", totalCurrentValue);
+        summaryData.put("totalDepreciation", totalDepreciation);
+        summaryData.put("avgDepreciationRate", avgDepreciationRate);
+        summaryData.put("orgCount", orgCount);
+        summaryData.put("categoryDistribution", categoryDistribution);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("reportType", reportType);
+        data.put("orgId", orgId.toString());
+        data.put("generatedAt", LocalDateTime.now().toString());
+        data.put("summaryData", summaryData);
 
         return data;
     }

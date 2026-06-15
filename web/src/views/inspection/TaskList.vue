@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getTasks, getMyTasks, createTask } from '@/api/inspection'
+import { getMyTasks, createTask } from '@/api/inspection'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -13,7 +13,7 @@ const form = ref({ taskName: '', assigneeId: null as number | null, startDate: '
 
 async function fetch() {
   loading.value = true
-  try { const res = tab.value === 'my' ? await getMyTasks() : await getTasks(); list.value = res.data || [] } finally { loading.value = false }
+  try { const res = await getMyTasks(); list.value = res.data || [] } finally { loading.value = false }
 }
 
 async function handleCreate() {

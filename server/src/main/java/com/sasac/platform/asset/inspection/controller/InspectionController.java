@@ -3,6 +3,7 @@ package com.sasac.platform.asset.inspection.controller;
 import com.sasac.platform.asset.inspection.entity.InspectionAnomaly;
 import com.sasac.platform.asset.inspection.entity.InspectionRecord;
 import com.sasac.platform.asset.inspection.entity.InspectionTask;
+import com.sasac.platform.asset.inspection.mapper.InspectionAnomalyMapper;
 import com.sasac.platform.asset.inspection.service.InspectionService;
 import com.sasac.platform.common.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ import java.util.List;
 public class InspectionController {
 
     private final InspectionService inspectionService;
+    private final InspectionAnomalyMapper anomalyMapper;
 
     // ---- Inspection Task ----
 
@@ -51,7 +53,7 @@ public class InspectionController {
      */
     @GetMapping("/inspection-tasks/my")
     public ResponseEntity<ApiResponse<List<InspectionTask>>> getMyTasks(
-            @RequestParam Long assigneeId) {
+            @RequestParam(required = false) Long assigneeId) {
         List<InspectionTask> tasks = inspectionService.getMyTasks(assigneeId);
         return ResponseEntity.ok(ApiResponse.success(tasks));
     }
@@ -88,6 +90,21 @@ public class InspectionController {
     }
 
     // ---- Inspection Anomaly ----
+
+    /**
+     * Lists all inspection anomalies optionally filtered by task.
+     */
+    @GetMapping("/inspection-anomalies")
+    public ResponseEntity<ApiResponse<List<InspectionAnomaly>>> listAllAnomalies(
+            @RequestParam(required = false) Long taskId) {
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<InspectionAnomaly> wrapper =
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        if (taskId != null) {
+            wrapper.eq(InspectionAnomaly::getTaskId, taskId);
+        }
+        wrapper.orderByDesc(InspectionAnomaly::getId);
+        return ResponseEntity.ok(ApiResponse.success(anomalyMapper.selectList(wrapper)));
+    }
 
     /**
      * Retrieves all anomalies for a task.

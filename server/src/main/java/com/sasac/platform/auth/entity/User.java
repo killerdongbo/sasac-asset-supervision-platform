@@ -37,4 +37,6 @@ public class User extends BaseEntity {
      * Account status: 1 = active, 0 = disabled.
      */
     private Integer status = 1;
+
+    private String openId;
 }

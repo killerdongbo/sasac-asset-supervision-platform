@@ -5,6 +5,7 @@ import com.sasac.platform.report.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,5 +44,17 @@ public class DashboardController {
     public ApiResponse<?> topOrgs(@RequestHeader("X-Tenant-Id") Long tenantId,
                                    @RequestParam(defaultValue = "10") int limit) {
         return ApiResponse.success(dashboardService.getTopOrgsByValue(tenantId, limit));
+    }
+
+    @GetMapping("/trend")
+    public ApiResponse<List<Map<String, Object>>> monthlyTrend(
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestParam(defaultValue = "12") int months) {
+        return ApiResponse.success(dashboardService.getMonthlyTrend(tenantId, months));
+    }
+
+    @GetMapping("/month-new")
+    public ApiResponse<Long> monthNewCount(@RequestHeader("X-Tenant-Id") Long tenantId) {
+        return ApiResponse.success(dashboardService.getMonthNewCount(tenantId));
     }
 }

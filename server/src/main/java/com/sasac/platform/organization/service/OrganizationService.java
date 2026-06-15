@@ -90,6 +90,13 @@ public class OrganizationService {
     }
 
     /**
+     * Lists all active organizations.
+     */
+    public java.util.List<Organization> listAll() {
+        return organizationMapper.selectList(null);
+    }
+
+    /**
      * Gets direct children of a parent organization, ordered by sort_order.
      *
      * @param parentId the parent organization ID

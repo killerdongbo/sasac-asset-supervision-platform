@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,19 +83,37 @@ public class DashboardService {
         result.put("avgDepreciationRate", avgDepreciationRate);
 
         // Category distribution: group by category, sum originalValue
-        Map<String, BigDecimal> categoryDistribution = assets.stream()
+        // Returns array of { name, value } for frontend chart consumption
+        List<Map<String, Object>> categoryDistribution = assets.stream()
                 .collect(Collectors.groupingBy(
                         Asset::getCategory,
                         Collectors.mapping(
                                 a -> a.getOriginalValue() != null ? a.getOriginalValue() : BigDecimal.ZERO,
                                 Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)
                         )
-                ));
+                ))
+                .entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("name", entry.getKey());
+                    item.put("value", entry.getValue());
+                    return item;
+                })
+                .collect(Collectors.toList());
         result.put("categoryDistribution", categoryDistribution);
 
         // Status distribution: group by useStatus, count
-        Map<String, Long> statusDistribution = assets.stream()
-                .collect(Collectors.groupingBy(Asset::getUseStatus, Collectors.counting()));
+        // Returns array of { name, value } for frontend chart consumption
+        List<Map<String, Object>> statusDistribution = assets.stream()
+                .collect(Collectors.groupingBy(Asset::getUseStatus, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("name", entry.getKey());
+                    item.put("value", entry.getValue());
+                    return item;
+                })
+                .collect(Collectors.toList());
         result.put("statusDistribution", statusDistribution);
 
         return result;
@@ -113,7 +135,6 @@ public class DashboardService {
 
         List<Asset> assets = assetMapper.selectList(wrapper);
 
-        // Group by orgId, sum originalValue
         Map<Long, BigDecimal> orgValues = assets.stream()
                 .collect(Collectors.groupingBy(
                         Asset::getOrgId,
@@ -123,7 +144,6 @@ public class DashboardService {
                         )
                 ));
 
-        // Sort descending by total value, apply limit, map to result format
         return orgValues.entrySet().stream()
                 .sorted(Map.Entry.<Long, BigDecimal>comparingByValue().reversed())
                 .limit(limit)
@@ -134,5 +154,39 @@ public class DashboardService {
                     return item;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> getMonthlyTrend(Long tenantId, int months) {
+        LocalDate now = LocalDate.now();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (int i = months - 1; i >= 0; i--) {
+            YearMonth ym = YearMonth.from(now.minusMonths(i));
+            LocalDateTime monthStart = ym.atDay(1).atStartOfDay();
+            LocalDateTime monthEnd = ym.atEndOfMonth().atTime(23, 59, 59);
+
+            long count = assetMapper.selectCount(
+                    new LambdaQueryWrapper<Asset>()
+                            .eq(Asset::getTenantId, tenantId)
+                            .ge(Asset::getCreatedAt, monthStart)
+                            .le(Asset::getCreatedAt, monthEnd)
+            );
+
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("month", ym.toString());
+            item.put("count", count);
+            result.add(item);
+        }
+        return result;
+    }
+
+    public long getMonthNewCount(Long tenantId) {
+        YearMonth current = YearMonth.now();
+        LocalDateTime monthStart = current.atDay(1).atStartOfDay();
+        return assetMapper.selectCount(
+                new LambdaQueryWrapper<Asset>()
+                        .eq(Asset::getTenantId, tenantId)
+                        .ge(Asset::getCreatedAt, monthStart)
+        );
     }
 }
