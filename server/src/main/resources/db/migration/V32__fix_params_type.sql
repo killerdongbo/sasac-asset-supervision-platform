@@ -1,0 +1,1 @@
+ALTER TABLE export_task ALTER COLUMN params TYPE TEXT;
