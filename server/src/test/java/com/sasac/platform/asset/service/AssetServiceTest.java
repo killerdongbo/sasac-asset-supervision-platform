@@ -1,5 +1,6 @@
 package com.sasac.platform.asset.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sasac.platform.asset.dto.AssetCreateDTO;
 import com.sasac.platform.asset.dto.AssetQueryDTO;
 import com.sasac.platform.asset.entity.Asset;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,9 +79,9 @@ class AssetServiceTest {
         query.setPage(1);
         query.setLimit(20);
 
-        List<Asset> results = assetService.query(query);
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("办公服务器");
+        Page<Asset> results = assetService.query(query);
+        assertThat(results.getRecords()).hasSize(1);
+        assertThat(results.getRecords().get(0).getName()).isEqualTo("办公服务器");
     }
 
     @Test
