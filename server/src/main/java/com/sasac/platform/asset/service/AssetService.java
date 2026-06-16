@@ -95,7 +95,7 @@ public class AssetService {
      * @param query the query DTO containing filters
      * @return list of matching assets
      */
-    public List<Asset> query(AssetQueryDTO query) {
+    public Page<Asset> query(AssetQueryDTO query) {
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
 
         if (query.getOrgId() != null) {
@@ -117,11 +117,10 @@ public class AssetService {
 
         wrapper.orderByDesc(Asset::getId);
 
-        Page<Asset> page = assetMapper.selectPage(
+        return assetMapper.selectPage(
                 new Page<>(query.getPage(), query.getLimit()),
                 wrapper
         );
-        return page.getRecords();
     }
 
     /**

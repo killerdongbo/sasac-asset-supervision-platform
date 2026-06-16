@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletResponse;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.io.IOException;
 import java.util.List;
 
@@ -72,8 +73,13 @@ public class AssetController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<Asset>>> query(@ModelAttribute AssetQueryDTO query) {
-        List<Asset> assets = assetService.query(query);
-        return ResponseEntity.ok(ApiResponse.success(assets));
+        Page<Asset> page = assetService.query(query);
+        ApiResponse.PageMeta meta = ApiResponse.PageMeta.builder()
+                .total(page.getTotal())
+                .page((int) page.getCurrent())
+                .limit((int) page.getSize())
+                .build();
+        return ResponseEntity.ok(ApiResponse.success(page.getRecords(), meta));
     }
 
     /**
