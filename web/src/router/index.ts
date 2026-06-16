@@ -65,6 +65,7 @@ const router = createRouter({
         { path: 'depreciation', name: 'DepreciationList', component: () => import('@/views/depreciation/DepreciationList.vue') },
 
         // ===== 审批工作流 =====
+        { path: 'approval/designer/:defId?', name: 'WorkflowDesigner', component: () => import('@/views/approval/WorkflowDesigner.vue') },
         { path: 'approval/pending', name: 'ApprovalPending', component: () => import('@/views/approval/PendingList.vue') },
         { path: 'approval/my-requests', name: 'ApprovalMyRequests', component: () => import('@/views/approval/MyRequestList.vue') },
         { path: 'approval/history', name: 'ApprovalHistory', component: () => import('@/views/approval/HistoryList.vue') },
