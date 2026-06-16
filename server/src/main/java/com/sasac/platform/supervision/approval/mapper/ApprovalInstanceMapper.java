@@ -22,14 +22,16 @@ public interface ApprovalInstanceMapper extends BaseMapper<ApprovalInstance> {
      * @param roleCode the approver role code
      * @return list of pending approval instances for the given role
      */
-    @Select("SELECT DISTINCT i.* FROM approval_instance i " +
+    @Select("<script>" +
+            "SELECT DISTINCT i.* FROM approval_instance i " +
             "JOIN approval_node n ON i.def_id = n.def_id AND i.current_node = n.node_order " +
             "WHERE i.status = 'PENDING' " +
-            "AND i.tenant_id = #{tenantId} " +
-            "AND n.approver_role = #{roleCode} " +
+            "<if test='tenantId != null'>AND i.tenant_id = #{tenantId}</if> " +
+            "<if test='roleCode != null'>AND n.approver_role = #{roleCode}</if> " +
             "AND n.deleted = 0 " +
             "AND i.deleted = 0 " +
-            "ORDER BY i.created_at DESC")
+            "ORDER BY i.created_at DESC" +
+            "</script>")
     List<ApprovalInstance> selectPendingByRole(@Param("tenantId") Long tenantId,
                                                @Param("roleCode") String roleCode);
 }

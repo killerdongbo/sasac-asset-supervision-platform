@@ -43,6 +43,17 @@ public class ChangeService {
 
         // Apply change based on type
         switch (change.getChangeType()) {
+            case "STOCK_IN":
+                asset.setUseStatus("IN_USE");
+                if (change.getToOrgId() != null) {
+                    asset.setOrgId(change.getToOrgId());
+                }
+                break;
+            case "ASSIGNMENT":
+                if (change.getToOrgId() != null) {
+                    asset.setOrgId(change.getToOrgId());
+                }
+                break;
             case "TRANSFER":
                 if (change.getToOrgId() != null) {
                     asset.setOrgId(change.getToOrgId());

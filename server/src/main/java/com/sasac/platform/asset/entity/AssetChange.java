@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Entity representing an asset change record (transfer, mortgage, rental, repair, status change).
+ * Entity representing an asset change record (stock-in, assignment, transfer,
+ * mortgage, rental, repair, status change).
  */
 @Getter
 @Setter
@@ -19,7 +20,7 @@ public class AssetChange extends BaseEntity {
     private Long assetId;
 
     /**
-     * Change type: TRANSFER, MORTGAGE, RENTAL, REPAIR, STATUS_CHANGE.
+     * Change type: STOCK_IN, ASSIGNMENT, TRANSFER, MORTGAGE, RENTAL, REPAIR, STATUS_CHANGE.
      */
     private String changeType;
 

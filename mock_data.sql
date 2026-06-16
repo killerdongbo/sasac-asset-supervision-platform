@@ -356,25 +356,81 @@ INSERT INTO operation_log (id, operator_id, operator_name, action, target_type, 
 (214, 101, '李四', 'CREATE', 'MaintenanceRequest', 100, NULL, '{"asset_id":211,"fault":"散热异常"}', '192.168.1.101', 1, '2026-06-10 15:00:00');
 
 -- ============================================
--- 第14部分: 审批定义 approval_def + 节点 approval_node
+-- ============================================
+-- 第14部分: 审批定义 approval_def (6个流程)
 -- ============================================
 INSERT INTO approval_def (id, def_name, biz_type, status, description, tenant_id, created_at, updated_at, deleted) VALUES
 (100, '资产采购审批流程', 'PURCHASE', 'ACTIVE', '资产采购审批，>10万需上级审批', 1, NOW(), NOW(), 0),
-(101, '资产处置审批流程', 'DISPOSAL', 'ACTIVE', '资产报废/处置审批流程',         1, NOW(), NOW(), 0);
-
-INSERT INTO approval_node (id, def_id, node_order, approver_role, condition_type, condition_value, approve_mode, can_reject, timeout_hours, allow_add_sign, timeout_action, escalate_role, created_at, updated_at, deleted) VALUES
-(300, 100, 1, 'ENTERPRISE_OPERATOR', NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE',   'ORG_MANAGER',  NOW(), NOW(), 0),
-(301, 100, 2, 'ORG_MANAGER',        'AMOUNT_GT', '100000', 'SINGLE', TRUE,  72, TRUE,  'ESCALATE',   'TENANT_ADMIN', NOW(), NOW(), 0),
-(302, 101, 1, 'ORG_MANAGER',        NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE',   'TENANT_ADMIN', NOW(), NOW(), 0),
-(303, 101, 2, 'TENANT_ADMIN',       NULL,        NULL,    'SINGLE', TRUE,  72, TRUE,  'ESCALATE',   'SYSTEM_ADMIN', NOW(), NOW(), 0);
+(101, '资产处置审批流程', 'DISPOSAL', 'ACTIVE', '资产报废/出售/核销审批流程', 1, NOW(), NOW(), 0),
+(102, '资产调拨审批流程', 'TRANSFER', 'ACTIVE', '资产跨组织调拨审批流程', 1, NOW(), NOW(), 0),
+(103, '盘点差异审批流程', 'INVENTORY_DIFF', 'ACTIVE', '盘点差异处理审批流程', 1, NOW(), NOW(), 0),
+(104, '维保维修审批流程', 'MAINTENANCE', 'ACTIVE', '资产维保维修申请审批流程', 1, NOW(), NOW(), 0),
+(105, '监管上报审批流程', 'REPORT', 'ACTIVE', '19类国资报表上报审核流程', 1, NOW(), NOW(), 0);
 
 -- ============================================
--- 第15部分: 审批实例 approval_instance
+-- 审批节点 approval_node (每个流程2步, 共12个)
+-- ============================================
+INSERT INTO approval_node (id, def_id, node_order, approver_role, condition_type, condition_value, approve_mode, can_reject, timeout_hours, allow_add_sign, timeout_action, escalate_role, created_at, updated_at, deleted) VALUES
+-- 采购审批: 企业操作员 → (金额>10万时)集团审核员
+(300, 100, 1, 'ENTERPRISE_OPERATOR', NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE', 'ORG_MANAGER',  NOW(), NOW(), 0),
+(301, 100, 2, 'ORG_MANAGER',        'AMOUNT_GT', '100000', 'SINGLE', TRUE,  72, TRUE,  'ESCALATE', 'TENANT_ADMIN', NOW(), NOW(), 0),
+-- 处置审批: 集团审核员 → 系统管理员
+(302, 101, 1, 'ORG_MANAGER',        NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE', 'TENANT_ADMIN',  NOW(), NOW(), 0),
+(303, 101, 2, 'TENANT_ADMIN',       NULL,        NULL,    'SINGLE', TRUE,  72, TRUE,  'ESCALATE', 'SYSTEM_ADMIN',  NOW(), NOW(), 0),
+-- 调拨审批: 企业操作员 → 集团审核员
+(304, 102, 1, 'ENTERPRISE_OPERATOR', NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE', 'ORG_MANAGER',  NOW(), NOW(), 0),
+(305, 102, 2, 'ORG_MANAGER',        NULL,        NULL,    'SINGLE', TRUE,  72, TRUE,  'ESCALATE', 'TENANT_ADMIN', NOW(), NOW(), 0),
+-- 盘点差异审批: 企业操作员 → 集团审核员
+(306, 103, 1, 'ENTERPRISE_OPERATOR', NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE', 'ORG_MANAGER',  NOW(), NOW(), 0),
+(307, 103, 2, 'ORG_MANAGER',        NULL,        NULL,    'SINGLE', TRUE,  72, TRUE,  'ESCALATE', 'TENANT_ADMIN', NOW(), NOW(), 0),
+-- 维保审批: 企业操作员 → 集团审核员
+(308, 104, 1, 'ENTERPRISE_OPERATOR', NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE', 'ORG_MANAGER',  NOW(), NOW(), 0),
+(309, 104, 2, 'ORG_MANAGER',        NULL,        NULL,    'SINGLE', TRUE,  72, TRUE,  'ESCALATE', 'TENANT_ADMIN', NOW(), NOW(), 0),
+-- 监管上报: 集团审核员 → 国资委监管员
+(310, 105, 1, 'ORG_MANAGER',        NULL,        NULL,    'SINGLE', TRUE,  48, TRUE,  'ESCALATE', 'TENANT_ADMIN',  NOW(), NOW(), 0),
+(311, 105, 2, 'SASAC_SUPERVISOR',   NULL,        NULL,    'SINGLE', TRUE,  120, TRUE, 'ESCALATE', 'SYSTEM_ADMIN',  NOW(), NOW(), 0);
+
+-- ============================================
+-- 第15部分: 审批实例 approval_instance (30条)
+-- 设计:
+--   待我审批(PENDING) = instances 400-409 (10条, 4条submitter=1 + 6条其他提交人)
+--   我发起的(submitter=1) = instances 400-403,410-419 (14条, 4条PENDING + 10条已完成)
+--   审批历史(submitter=1 & !PENDING) = instances 410-419 (10条已完成)
 -- ============================================
 INSERT INTO approval_instance (id, def_id, biz_id, biz_type, status, current_node, node_results, submitter_id, tenant_id, created_at, updated_at, deleted) VALUES
-(400, 100, 300, 'PURCHASE', 'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                          102, 1, '2026-05-10 10:00:00', NOW(), 0),
-(401, 101, 200, 'DISPOSAL',  'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]', 103, 1, '2026-05-15 10:00:00', NOW(), 0),
-(402, 100, 301, 'PURCHASE',  'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]', 103, 1, '2026-04-01 10:00:00', NOW(), 0);
+-- ── 待我审批 PENDING (10条: id=400-409) ──
+(400, 100, 300, 'PURCHASE',       'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      1,   1, '2026-06-15 09:00:00', NOW(), 0),
+(401, 100, 301, 'PURCHASE',       'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      1,   1, '2026-06-14 14:30:00', NOW(), 0),
+(402, 101, 201, 'DISPOSAL',       'PENDING',  2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"PENDING"}]',       1,   1, '2026-06-13 11:00:00', NOW(), 0),
+(403, 102, 202, 'TRANSFER',       'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      1,   1, '2026-06-12 08:30:00', NOW(), 0),
+(404, 103, 400, 'INVENTORY_DIFF', 'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      102, 1, '2026-06-15 10:00:00', NOW(), 0),
+(405, 104, 500, 'MAINTENANCE',    'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      102, 1, '2026-06-14 16:00:00', NOW(), 0),
+(406, 105, 601, 'REPORT',         'PENDING',  2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"PENDING"}]',       103, 1, '2026-06-13 09:00:00', NOW(), 0),
+(407, 100, 302, 'PURCHASE',       'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      103, 1, '2026-06-11 15:00:00', NOW(), 0),
+(408, 104, 501, 'MAINTENANCE',    'PENDING',  2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"PENDING"}]',       104, 1, '2026-06-10 13:00:00', NOW(), 0),
+(409, 101, 203, 'DISPOSAL',       'PENDING',  1, '[{"node":1,"status":"PENDING"}]',                                      104, 1, '2026-06-09 10:00:00', NOW(), 0),
+-- ── 我发起的已完成 (10条: id=410-419, submitter=1) ──
+(410, 100, 303, 'PURCHASE',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-06-08 09:00:00', NOW(), 0),
+(411, 101, 204, 'DISPOSAL',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-06-07 11:00:00', NOW(), 0),
+(412, 102, 205, 'TRANSFER',       'REJECTED', 2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"REJECTED"}]',      1,   1, '2026-06-06 14:00:00', NOW(), 0),
+(413, 103, 401, 'INVENTORY_DIFF', 'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-06-05 10:00:00', NOW(), 0),
+(414, 104, 502, 'MAINTENANCE',    'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-06-04 16:00:00', NOW(), 0),
+(415, 105, 602, 'REPORT',         'REJECTED', 1, '[{"node":1,"status":"REJECTED"}]',                                     1,   1, '2026-06-03 08:00:00', NOW(), 0),
+(416, 100, 304, 'PURCHASE',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-06-02 09:30:00', NOW(), 0),
+(417, 101, 206, 'DISPOSAL',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-06-01 13:00:00', NOW(), 0),
+(418, 102, 207, 'TRANSFER',       'REJECTED', 1, '[{"node":1,"status":"REJECTED"}]',                                     1,   1, '2026-05-28 15:00:00', NOW(), 0),
+(419, 104, 503, 'MAINTENANCE',    'CANCELLED',2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"CANCELLED"}]',      1,   1, '2026-05-25 11:00:00', NOW(), 0),
+-- ── 其他已完成的补充(10条: id=420-429, 丰富审批历史) ──
+(420, 100, 305, 'PURCHASE',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-05-20 09:00:00', NOW(), 0),
+(421, 105, 603, 'REPORT',         'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      1,   1, '2026-05-18 10:00:00', NOW(), 0),
+(422, 103, 402, 'INVENTORY_DIFF', 'REJECTED', 2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"REJECTED"}]',      1,   1, '2026-05-15 14:00:00', NOW(), 0),
+(423, 102, 208, 'TRANSFER',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      102, 1, '2026-06-08 09:00:00', NOW(), 0),
+(424, 104, 504, 'MAINTENANCE',    'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      102, 1, '2026-06-02 16:00:00', NOW(), 0),
+(425, 101, 207, 'DISPOSAL',       'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      103, 1, '2026-05-20 10:00:00', NOW(), 0),
+(426, 100, 306, 'PURCHASE',       'REJECTED', 1, '[{"node":1,"status":"REJECTED"}]',                                     103, 1, '2026-05-10 09:00:00', NOW(), 0),
+(427, 105, 604, 'REPORT',         'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      103, 1, '2026-04-25 11:00:00', NOW(), 0),
+(428, 102, 209, 'TRANSFER',       'CANCELLED',2, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"CANCELLED"}]',      104, 1, '2026-04-15 15:00:00', NOW(), 0),
+(429, 103, 403, 'INVENTORY_DIFF', 'APPROVED', 3, '[{"node":1,"status":"APPROVED"},{"node":2,"status":"APPROVED"}]',      104, 1, '2026-04-10 08:00:00', NOW(), 0);
 
 -- ============================================
 -- 第16部分: 采购请求 purchase_request + 验收 purchase_acceptance

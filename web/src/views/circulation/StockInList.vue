@@ -4,7 +4,7 @@ import { getStockIns, createStockIn } from '@/api/circulation'
 import { ElMessage } from 'element-plus'
 
 const list = ref<any[]>([]); const loading = ref(false); const dialogVisible = ref(false)
-const form = ref({ assetId: null as number | null, fromOrgId: null as number | null, toOrgId: null as number | null, locationId: null as number | null, remark: '' })
+const form = ref({ assetCode: '', toOrgId: null as number | null, remark: '' })
 
 async function fetch() { loading.value = true; try { const res = await getStockIns(); list.value = res.data } finally { loading.value = false } }
 async function handleCreate() { await createStockIn(form.value); ElMessage.success('入库成功'); dialogVisible.value = false; fetch() }
@@ -15,7 +15,8 @@ onMounted(fetch)
   <div class="page">
     <div class="page-header"><h3>入库管理</h3><el-button type="primary" @click="dialogVisible = true">新增入库</el-button></div>
     <el-table :data="list" v-loading="loading" border stripe>
-      <el-table-column prop="assetId" label="资产ID" width="120" />
+      <el-table-column prop="assetCode" label="资产编号" width="160" />
+      <el-table-column prop="assetName" label="资产名称" min-width="160" />
       <el-table-column prop="fromOrgId" label="来源组织" width="120" />
       <el-table-column prop="toOrgId" label="目标组织" width="120" />
       <el-table-column prop="remark" label="备注" min-width="200" />
@@ -23,7 +24,7 @@ onMounted(fetch)
     </el-table>
     <el-dialog title="新增入库" v-model="dialogVisible" width="420px">
       <el-form :model="form" label-width="80px">
-        <el-form-item label="资产ID"><el-input-number v-model="form.assetId" /></el-form-item>
+        <el-form-item label="资产编号"><el-input v-model="form.assetCode" placeholder="请输入资产编号" /></el-form-item>
         <el-form-item label="目标组织"><el-input-number v-model="form.toOrgId" /></el-form-item>
         <el-form-item label="备注"><el-input v-model="form.remark" /></el-form-item>
       </el-form>
