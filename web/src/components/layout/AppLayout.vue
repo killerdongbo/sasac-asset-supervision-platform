@@ -41,11 +41,12 @@
             <el-menu-item index="/disposals"><span>资产报废</span></el-menu-item>
           </el-sub-menu>
 
-          <el-sub-menu index="procurement">
+          <!-- 采购管理模块已隐藏 -->
+          <!-- <el-sub-menu index="procurement">
             <template #title><el-icon><ShoppingCart /></el-icon><span>采购管理</span></template>
             <el-menu-item index="/purchase-requests"><span>采购申请</span></el-menu-item>
             <el-menu-item index="/purchase-acceptances"><span>采购验收</span></el-menu-item>
-          </el-sub-menu>
+          </el-sub-menu> -->
 
           <el-sub-menu index="field">
             <template #title><el-icon><Monitor /></el-icon><span>现场管理</span></template>
