@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,8 +33,8 @@ public class ExportController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<ExportTask>> createExport(
-            @Valid @RequestBody ExportRequestDTO dto) {
-        Long tenantId = 0L;
+            @Valid @RequestBody ExportRequestDTO dto,
+            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
         Long userId = 0L;
         ExportTask task = exportService.createTask(tenantId, userId, dto);
         return ResponseEntity.ok(ApiResponse.success(task));
@@ -42,8 +43,8 @@ public class ExportController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ExportTask>>> listExports(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        Long tenantId = 0L;
+            @RequestParam(defaultValue = "20") int size,
+            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
         Page<ExportTask> result = exportService.listTasks(tenantId, page, size);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
@@ -101,8 +102,8 @@ public class ExportController {
     @PostMapping("/import")
     public ResponseEntity<ApiResponse<ImportResultDTO>> importData(
             @RequestParam("file") MultipartFile file,
-            @RequestParam String exportType) {
-        Long tenantId = 0L;
+            @RequestParam String exportType,
+            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
         try {
             ImportResultDTO result = importService.importData(file, exportType, tenantId);
             return ResponseEntity.ok(ApiResponse.success(result));
