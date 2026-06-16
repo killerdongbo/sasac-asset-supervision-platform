@@ -142,8 +142,8 @@ async function fetchAssets() {
     if (queryForm.useStatus) params.useStatus = queryForm.useStatus
 
     const response = await queryAssets(params)
-    assets.value = response.data || []
-    total.value = response.meta?.total ?? 0
+    assets.value = (response as any).data || []
+    total.value = Number((response as any).meta?.total) || 0
   } catch {
     assets.value = []
     total.value = 0
