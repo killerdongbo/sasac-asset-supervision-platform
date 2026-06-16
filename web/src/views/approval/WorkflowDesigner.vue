@@ -153,82 +153,72 @@ const nodeTypes = [
 
 // Custom Vue Flow node component
 const CustomNode = markRaw({
-  props: ['data', 'type'],
+  props: ['data', 'type', 'sourcePosition', 'targetPosition'],
   setup(props: any) {
     const styles: Record<string, any> = {
       start: {
-        borderRadius: '20px',
-        background: '#dbeafe',
-        border: '2px solid #3b82f6',
-        padding: '6px 16px',
-        fontSize: '12px',
-        fontWeight: '600',
+        borderRadius: '20px', background: '#dbeafe', border: '2px solid #3b82f6',
+        padding: '8px 18px 8px 16px', fontSize: '12px', fontWeight: '600',
       },
       approval: {
-        borderRadius: '8px',
-        background: '#f8fafc',
-        border: '2px solid #94a3b8',
-        padding: '8px 16px',
-        fontSize: '12px',
-        minWidth: '100px',
+        borderRadius: '8px', background: '#f8fafc', border: '2px solid #94a3b8',
+        padding: '10px 18px', fontSize: '12px', minWidth: '100px',
       },
       gateway: {
-        borderRadius: '0',
-        background: '#fef9c3',
-        border: '2px solid #eab308',
-        padding: '6px 12px',
-        fontSize: '11px',
-        transform: 'rotate(45deg)',
-        textAlign: 'center',
-        minWidth: '60px',
+        borderRadius: '4px', background: '#fef9c3', border: '2px solid #eab308',
+        padding: '6px 12px', fontSize: '11px', textAlign: 'center',
+        minWidth: '50px', minHeight: '50px',
       },
       parallel: {
-        borderRadius: '4px',
-        background: '#f3e8ff',
-        border: '2px solid #a855f7',
-        padding: '8px 16px',
-        fontSize: '12px',
+        borderRadius: '4px', background: '#f3e8ff', border: '2px solid #a855f7',
+        padding: '10px 18px', fontSize: '12px',
       },
       join: {
-        borderRadius: '4px',
-        background: '#f3e8ff',
-        border: '2px solid #a855f7',
-        padding: '8px 16px',
-        fontSize: '12px',
+        borderRadius: '4px', background: '#f3e8ff', border: '2px solid #a855f7',
+        padding: '10px 18px', fontSize: '12px',
       },
       subflow: {
-        borderRadius: '8px',
-        background: '#fce7f3',
-        border: '2px solid #ec4899',
-        padding: '8px 16px',
-        fontSize: '12px',
+        borderRadius: '8px', background: '#fce7f3', border: '2px solid #ec4899',
+        padding: '10px 18px', fontSize: '12px',
       },
       end: {
-        borderRadius: '20px',
-        background: '#dcfce7',
-        border: '2px solid #22c55e',
-        padding: '6px 16px',
-        fontSize: '12px',
-        fontWeight: '600',
+        borderRadius: '20px', background: '#dcfce7', border: '2px solid #22c55e',
+        padding: '8px 18px 8px 16px', fontSize: '12px', fontWeight: '600',
       },
     }
     const icons: Record<string, string> = {
-      start: '▶',
-      approval: '👤',
-      gateway: '◇',
-      parallel: '⫸',
-      join: '⫷',
-      subflow: '↗',
-      end: '⏹',
+      start: '▶', approval: '👤', gateway: '◇',
+      parallel: '⫸', join: '⫷', subflow: '↗', end: '⏹',
     }
-    return () =>
-      h('div', { style: styles[props.type] || styles.approval }, [
-        h('span', { style: { marginRight: '4px' } }, icons[props.type] || ''),
-        props.data?.label || props.type,
-      ])
+    return () => {
+      const children: any[] = []
+      const nodeType = props.type || 'approval'
+
+      if (nodeType !== 'start') {
+        children.push(
+          h(Handle, { type: 'target', position: Position.Top,
+            style: { background: '#555', width: '10px', height: '10px', border: '2px solid #fff' } })
+        )
+      }
+
+      children.push(
+        h('span', { style: { margin: '0 4px' } }, [
+          h('span', { style: { marginRight: '4px' } }, icons[nodeType] || ''),
+          props.data?.label || nodeType,
+        ])
+      )
+
+      if (nodeType !== 'end') {
+        children.push(
+          h(Handle, { type: 'source', position: Position.Bottom,
+            style: { background: '#555', width: '10px', height: '10px', border: '2px solid #fff' } })
+        )
+      }
+
+      return h('div', { style: styles[nodeType] || styles.approval }, children)
+    }
   },
 })
-
 const customNodeTypes: Record<string, any> = {}
 for (const nt of nodeTypes) {
   customNodeTypes[nt.type] = CustomNode
