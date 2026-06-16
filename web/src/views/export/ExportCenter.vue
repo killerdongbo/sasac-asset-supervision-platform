@@ -61,7 +61,7 @@
         <!-- ===== Tab 2: 报表导入 ===== -->
         <el-tab-pane label="报表导入" name="import">
           <el-select v-model="importExportType" placeholder="选择导入报表类型" style="width: 300px; margin-bottom: 16px">
-            <el-option-group v-for="group in importableGroups" :key="group.label" :label="group.label">
+            <el-option-group v-for="group in reportTypeGroups" :key="group.label" :label="group.label">
               <el-option v-for="opt in group.options" :key="opt.value" :label="opt.label" :value="opt.value" />
             </el-option-group>
           </el-select>
@@ -251,19 +251,6 @@ const importPreview = ref<ImportResult>({
 const previewing = ref(false)
 const importing = ref(false)
 const uploadRef = ref()
-
-const importableGroups = [
-  {
-    label: '综合报表',
-    options: [
-      { value: 'ASSET_BASE_LIST', label: '资产底数清单' },
-      { value: 'ASSET_LIST', label: '资产台账' },
-      { value: 'BALANCE_SHEET', label: '资产负债表' },
-      { value: 'PROBLEM_ASSET_LIST', label: '问题资产及整治清单' },
-      { value: 'REVITALIZATION_LIST', label: '盘活利用清单' },
-    ],
-  },
-]
 
 function handleFileChange(file: any) {
   importFile.value = file.raw
