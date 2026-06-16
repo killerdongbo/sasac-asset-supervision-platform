@@ -155,67 +155,77 @@ const nodeTypes = [
 const CustomNode = markRaw({
   props: ['data', 'type', 'sourcePosition', 'targetPosition'],
   setup(props: any) {
-    const styles: Record<string, any> = {
-      start: {
-        borderRadius: '20px', background: '#dbeafe', border: '2px solid #3b82f6',
-        padding: '8px 18px 8px 16px', fontSize: '12px', fontWeight: '600',
-      },
-      approval: {
-        borderRadius: '8px', background: '#f8fafc', border: '2px solid #94a3b8',
-        padding: '10px 18px', fontSize: '12px', minWidth: '100px',
-      },
-      gateway: {
-        borderRadius: '4px', background: '#fef9c3', border: '2px solid #eab308',
-        padding: '6px 12px', fontSize: '11px', textAlign: 'center',
-        minWidth: '50px', minHeight: '50px',
-      },
-      parallel: {
-        borderRadius: '4px', background: '#f3e8ff', border: '2px solid #a855f7',
-        padding: '10px 18px', fontSize: '12px',
-      },
-      join: {
-        borderRadius: '4px', background: '#f3e8ff', border: '2px solid #a855f7',
-        padding: '10px 18px', fontSize: '12px',
-      },
-      subflow: {
-        borderRadius: '8px', background: '#fce7f3', border: '2px solid #ec4899',
-        padding: '10px 18px', fontSize: '12px',
-      },
-      end: {
-        borderRadius: '20px', background: '#dcfce7', border: '2px solid #22c55e',
-        padding: '8px 18px 8px 16px', fontSize: '12px', fontWeight: '600',
-      },
+    const typeStyles: Record<string, any> = {
+      start: { borderRadius: '20px', background: '#dbeafe', border: '2px solid #3b82f6', padding: '8px 20px', fontSize: '13px', fontWeight: '700', minWidth: '80px', textAlign: 'center' },
+      approval: { borderRadius: '8px', background: '#f8fafc', border: '2px solid #64748b', padding: '10px 16px', fontSize: '12px', minWidth: '160px' },
+      gateway: { borderRadius: '8px', background: '#fef9c3', border: '2px solid #eab308', padding: '8px 14px', fontSize: '11px', minWidth: '110px' },
+      parallel: { borderRadius: '6px', background: '#f3e8ff', border: '2px solid #a855f7', padding: '8px 14px', fontSize: '12px', minWidth: '100px', textAlign: 'center' },
+      join: { borderRadius: '6px', background: '#f3e8ff', border: '2px solid #a855f7', padding: '8px 14px', fontSize: '12px', minWidth: '80px', textAlign: 'center' },
+      subflow: { borderRadius: '8px', background: '#fce7f3', border: '2px dashed #ec4899', padding: '10px 14px', fontSize: '12px', minWidth: '140px' },
+      end: { borderRadius: '20px', background: '#dcfce7', border: '2px solid #22c55e', padding: '8px 20px', fontSize: '13px', fontWeight: '700', minWidth: '80px', textAlign: 'center' },
     }
-    const icons: Record<string, string> = {
-      start: '▶', approval: '👤', gateway: '◇',
-      parallel: '⫸', join: '⫷', subflow: '↗', end: '⏹',
+    const icons: Record<string, string> = { start: '▶', approval: '👤', gateway: '◇', parallel: '⫸', join: '⫷', subflow: '↗', end: '⏹' }
+
+    // Helper to build sub-info line with a label + value
+    const subInfo = (label: string, value: any, color = '#64748b') => {
+      if (value === undefined || value === null || value === '' || value === 0) return null
+      return h('div', { style: { fontSize: '10px', color, marginTop: '2px', lineHeight: '1.4', wordBreak: 'break-all' } }, label + String(value))
     }
+
     return () => {
       const children: any[] = []
       const nodeType = props.type || 'approval'
+      const d = props.data || {}
+      const style = typeStyles[nodeType] || typeStyles.approval
 
+      // Target handle (input)
       if (nodeType !== 'start') {
-        children.push(
-          h(Handle, { type: 'target', position: Position.Top,
-            style: { background: '#555', width: '10px', height: '10px', border: '2px solid #fff' } })
-        )
+        children.push(h(Handle, { type: 'target', position: Position.Top, style: { background: '#555', width: '10px', height: '10px', border: '2px solid #fff' } }))
       }
 
+      // ---- Node header ----
       children.push(
-        h('span', { style: { margin: '0 4px' } }, [
-          h('span', { style: { marginRight: '4px' } }, icons[nodeType] || ''),
-          props.data?.label || nodeType,
+        h('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', fontSize: style.fontSize || '12px', marginBottom: (nodeType === 'approval' || nodeType === 'gateway' || nodeType === 'subflow') ? '4px' : '0' } }, [
+          h('span', null, icons[nodeType] || ''),
+          h('span', null, d.label || nodeType),
         ])
       )
 
-      if (nodeType !== 'end') {
-        children.push(
-          h(Handle, { type: 'source', position: Position.Bottom,
-            style: { background: '#555', width: '10px', height: '10px', border: '2px solid #fff' } })
-        )
+      // ---- Node details (approval node) ----
+      if (nodeType === 'approval') {
+        // Approval mode badge
+        const modeMap: Record<string, string> = { SINGLE: '单人审批', COUNTER_SIGN: '会签', OR_SIGN: '或签' }
+        const modeLabel = modeMap[d.approveMode] || ''
+        children.push(subInfo('✅ 审批角色：', d.approverRole || '未设置', '#1e40af'))
+        if (modeLabel) children.push(subInfo('📋 审批模式：', modeLabel, '#6366f1'))
+        if (d.timeoutHours > 0) {
+          const actionMap: Record<string, string> = { ESCALATE: '升级', NOTIFY: '通知', AUTO_APPROVE: '自动通过', AUTO_REJECT: '自动驳回' }
+          children.push(subInfo('⏰ 超时：', `${d.timeoutHours}h ` + (actionMap[d.timeoutAction] || ''), '#dc2626'))
+        }
+        // Additional features
+        const features: string[] = []
+        if (d.allowAddSign) features.push('可加签')
+        if (d.canReject) features.push('可驳回')
+        if (features.length) children.push(subInfo('🔧 ', features.join(' | '), '#059669'))
       }
 
-      return h('div', { style: styles[nodeType] || styles.approval }, children)
+      // ---- Node details (gateway node) ----
+      if (nodeType === 'gateway') {
+        children.push(subInfo('⚖️ 条件：', d.conditionExpr || '未设置条件', '#b45309'))
+        children.push(h('div', { style: { fontSize: '9px', color: '#94a3b8', marginTop: '2px' } }, 'true/false 分支'))
+      }
+
+      // ---- Node details (subflow node) ----
+      if (nodeType === 'subflow') {
+        children.push(subInfo('📄 引用流程ID：', d.refDefId || '未设置', '#be185d'))
+      }
+
+      // Source handle (output)
+      if (nodeType !== 'end') {
+        children.push(h(Handle, { type: 'source', position: Position.Bottom, style: { background: '#555', width: '10px', height: '10px', border: '2px solid #fff' } }))
+      }
+
+      return h('div', { style }, children)
     }
   },
 })
