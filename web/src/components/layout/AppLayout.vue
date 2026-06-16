@@ -82,12 +82,6 @@
             <el-menu-item index="/audit-lifecycle"><span>资产追踪</span></el-menu-item>
           </el-sub-menu>
 
-          <el-sub-menu index="quotation-group">
-            <template #title><el-icon><Coin /></el-icon><span>报价分析</span></template>
-            <el-menu-item index="/quotation/inquiries"><span>询价管理</span></el-menu-item>
-            <el-menu-item index="/quotation/price-trend"><span>价格趋势</span></el-menu-item>
-          </el-sub-menu>
-
           <el-sub-menu index="statistics-group">
             <template #title><el-icon><PieChart /></el-icon><span>统计报表</span></template>
             <el-menu-item index="/statistics/group"><span>集团穿透统计</span></el-menu-item>
@@ -134,8 +128,6 @@
         <el-menu-item index="/maintenance-requests">维保维修</el-menu-item>
         <el-menu-item index="/approval/pending">待我审批</el-menu-item>
         <el-menu-item index="/alerts">预警中心</el-menu-item>
-        <el-menu-item index="/quotation/inquiries">询价管理</el-menu-item>
-        <el-menu-item index="/quotation/price-trend">价格趋势</el-menu-item>
         <el-menu-item index="/statistics/group">集团统计</el-menu-item>
       </el-menu>
     </el-drawer>
