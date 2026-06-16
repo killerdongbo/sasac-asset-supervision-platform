@@ -29,7 +29,7 @@ public class DashboardController {
      *         avgDepreciationRate, categoryDistribution, and statusDistribution
      */
     @GetMapping("/overview")
-    public ApiResponse<Map<String, Object>> overview(@RequestHeader("X-Tenant-Id") Long tenantId) {
+    public ApiResponse<Map<String, Object>> overview(@RequestHeader(value = "X-Tenant-Id", defaultValue = "0") Long tenantId) {
         return ApiResponse.success(dashboardService.getOverview(tenantId));
     }
 
@@ -41,20 +41,20 @@ public class DashboardController {
      * @return ApiResponse containing a list of orgId/totalValue entries
      */
     @GetMapping("/top-orgs")
-    public ApiResponse<?> topOrgs(@RequestHeader("X-Tenant-Id") Long tenantId,
+    public ApiResponse<?> topOrgs(@RequestHeader(value = "X-Tenant-Id", defaultValue = "0") Long tenantId,
                                    @RequestParam(defaultValue = "10") int limit) {
         return ApiResponse.success(dashboardService.getTopOrgsByValue(tenantId, limit));
     }
 
     @GetMapping("/trend")
     public ApiResponse<List<Map<String, Object>>> monthlyTrend(
-            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestHeader(value = "X-Tenant-Id", defaultValue = "0") Long tenantId,
             @RequestParam(defaultValue = "12") int months) {
         return ApiResponse.success(dashboardService.getMonthlyTrend(tenantId, months));
     }
 
     @GetMapping("/month-new")
-    public ApiResponse<Long> monthNewCount(@RequestHeader("X-Tenant-Id") Long tenantId) {
+    public ApiResponse<Long> monthNewCount(@RequestHeader(value = "X-Tenant-Id", defaultValue = "0") Long tenantId) {
         return ApiResponse.success(dashboardService.getMonthNewCount(tenantId));
     }
 }
