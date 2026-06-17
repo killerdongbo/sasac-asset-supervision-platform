@@ -142,7 +142,14 @@ const router = createRouter({
         { path: 'investments/:id/equity-tree', name: 'InvestEquityTree', component: () => import('@/views/investment/EquityTree.vue') },
 
         // ===== 导出中心 =====
-        { path: 'exports', name: 'ExportCenter', component: () => import('@/views/export/ExportCenter.vue') }
+        { path: 'exports', name: 'ExportCenter', component: () => import('@/views/export/ExportCenter.vue') },
+
+        // ===== 产权管理 =====
+        { path: 'property/registrations', name: 'PrRegistrationList', component: () => import('@/views/property/PropertyRegistrationList.vue') },
+        { path: 'property/registrations/create', name: 'PrRegistrationCreate', component: () => import('@/views/property/PropertyRegistrationForm.vue') },
+        { path: 'property/tree', name: 'PrPropertyTree', component: () => import('@/views/property/PropertyTree.vue') },
+        { path: 'property/transactions', name: 'PrTransactionMonitor', component: () => import('@/views/property/TransactionMonitor.vue') },
+        { path: 'property/assessments', name: 'PrAssessmentList', component: () => import('@/views/property/AssessmentList.vue') }
       ]
     }
   ]
