@@ -182,7 +182,11 @@ public class PerfPerformanceService {
                 budget.setStatus("DRAFT");
             }
         }
-        salaryBudgetMapper.insertOrUpdate(budget);
+        if (budget.getId() != null) {
+            salaryBudgetMapper.updateById(budget);
+        } else {
+            salaryBudgetMapper.insert(budget);
+        }
         return budget;
     }
 
