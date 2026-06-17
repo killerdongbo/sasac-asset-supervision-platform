@@ -118,6 +118,11 @@ const router = createRouter({
         { path: 'quotation/compare/:id', name: 'QuotationCompare', component: () => import('@/views/quotation/QuotationCompare.vue') },
         { path: 'quotation/price-trend', name: 'PriceTrend', component: () => import('@/views/quotation/PriceTrend.vue') },
 
+        // ===== 三重一大决策管理 =====
+        { path: 'decision/items', name: 'DecisionItemList', component: () => import('@/views/decision/ItemList.vue') },
+        { path: 'decision/items/create', name: 'DecisionItemCreate', component: () => import('@/views/decision/ItemForm.vue') },
+        { path: 'decision/supervisions', name: 'DecisionSupervisionBoard', component: () => import('@/views/decision/SupervisionBoard.vue') },
+
         // ===== 导出中心 =====
         { path: 'exports', name: 'ExportCenter', component: () => import('@/views/export/ExportCenter.vue') }
       ]
