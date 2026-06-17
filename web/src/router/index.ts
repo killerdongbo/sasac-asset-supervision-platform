@@ -123,6 +123,12 @@ const router = createRouter({
         { path: 'decision/items/create', name: 'DecisionItemCreate', component: () => import('@/views/decision/ItemForm.vue') },
         { path: 'decision/supervisions', name: 'DecisionSupervisionBoard', component: () => import('@/views/decision/SupervisionBoard.vue') },
 
+        // ===== 项目管理 =====
+        { path: 'projects', name: 'PmProjectList', component: () => import('@/views/project/ProjectList.vue') },
+        { path: 'projects/create', name: 'PmProjectCreate', component: () => import('@/views/project/ProjectForm.vue') },
+        { path: 'projects/:id', name: 'PmProjectDetail', component: () => import('@/views/project/ProjectDashboard.vue') },
+        { path: 'projects/:id/edit', name: 'PmProjectEdit', component: () => import('@/views/project/ProjectForm.vue') },
+
         // ===== 导出中心 =====
         { path: 'exports', name: 'ExportCenter', component: () => import('@/views/export/ExportCenter.vue') }
       ]
