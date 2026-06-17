@@ -157,6 +157,12 @@ const router = createRouter({
         { path: 'finance/funds', name: 'FinFundMonitor', component: () => import('@/views/finance/FundMonitor.vue') },
         { path: 'finance/budgets', name: 'FinBudgetExecution', component: () => import('@/views/finance/BudgetExecution.vue') },
 
+        // ===== 监督追责 =====
+        { path: 'supervision/audit-plans', name: 'SupAuditPlanList', component: () => import('@/views/supervision/AuditPlanList.vue') },
+        { path: 'supervision/findings', name: 'SupAuditFindingBoard', component: () => import('@/views/supervision/AuditFindingBoard.vue') },
+        { path: 'supervision/rectifications', name: 'SupRectificationTracker', component: () => import('@/views/supervision/RectificationTracker.vue') },
+        { path: 'supervision/cases', name: 'SupViolationCaseList', component: () => import('@/views/supervision/ViolationCaseList.vue') },
+
         // ===== 业绩考核与薪酬管理 =====
         { path: 'performance/indicators', name: 'PerfIndicatorManage', component: () => import('@/views/performance/IndicatorManage.vue') },
         { path: 'performance/scoreboard', name: 'PerfScoreboard', component: () => import('@/views/performance/PerformanceScoreboard.vue') },
