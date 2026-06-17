@@ -149,7 +149,13 @@ const router = createRouter({
         { path: 'property/registrations/create', name: 'PrRegistrationCreate', component: () => import('@/views/property/PropertyRegistrationForm.vue') },
         { path: 'property/tree', name: 'PrPropertyTree', component: () => import('@/views/property/PropertyTree.vue') },
         { path: 'property/transactions', name: 'PrTransactionMonitor', component: () => import('@/views/property/TransactionMonitor.vue') },
-        { path: 'property/assessments', name: 'PrAssessmentList', component: () => import('@/views/property/AssessmentList.vue') }
+        { path: 'property/assessments', name: 'PrAssessmentList', component: () => import('@/views/property/AssessmentList.vue') },
+
+        // ===== 财务监督 =====
+        { path: 'finance/reports', name: 'FinReportList', component: () => import('@/views/finance/FinanceReportList.vue') },
+        { path: 'finance/indicators', name: 'FinIndicatorDashboard', component: () => import('@/views/finance/FinanceIndicatorDashboard.vue') },
+        { path: 'finance/funds', name: 'FinFundMonitor', component: () => import('@/views/finance/FundMonitor.vue') },
+        { path: 'finance/budgets', name: 'FinBudgetExecution', component: () => import('@/views/finance/BudgetExecution.vue') }
       ]
     }
   ]
