@@ -10,6 +10,7 @@ const editing = ref(false)
 const formRef = ref<any>(null)
 
 const form = ref({
+  id: undefined as number | undefined,
   tenantId: 1,
   orgId: 1,
   planYear: new Date().getFullYear(),

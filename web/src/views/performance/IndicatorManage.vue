@@ -24,7 +24,7 @@
       <el-table :data="indicators" v-loading="loading" stripe style="width: 100%" max-height="600">
         <el-table-column type="index" label="序号" width="60" />
         <el-table-column prop="indicatorCode" label="指标编码" width="150">
-          <template #default="{ row, $index }">
+          <template #default="{ row }">
             <el-input v-model="row.indicatorCode" size="small" placeholder="请输入编码" />
           </template>
         </el-table-column>

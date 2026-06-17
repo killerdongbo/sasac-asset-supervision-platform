@@ -157,7 +157,7 @@ async function handleResolve() {
     return
   }
   try {
-    await resolveEvent(currentEvent.value.id, resolveResult.value)
+    await resolveEvent(currentEvent.value.id)
     ElMessage.success('事项已解决')
     resolveDialogVisible.value = false
     fetch()
@@ -189,7 +189,7 @@ function getEventTypeLabel(type: string): string {
   return eventTypeOptions.find(o => o.value === type)?.label || type
 }
 
-function formatCurrency(val: number | null | undefined): string {
+function _formatCurrency(val: number | null | undefined): string {
   if (val == null) return '-'
   return '¥' + Number(val).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }

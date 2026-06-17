@@ -113,7 +113,7 @@ async function handleResolve() {
     return
   }
   try {
-    await resolveEvent(event.value.id, resolveResult.value)
+    await resolveEvent(event.value.id)
     ElMessage.success('事项已解决')
     resolveDialogVisible.value = false
     fetch()

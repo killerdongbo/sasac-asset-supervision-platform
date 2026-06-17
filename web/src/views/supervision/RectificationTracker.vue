@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getRectifications, verifyRectification, checkOverdueRectifications } from '@/api/supervision'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 const list = ref<any[]>([])
 const loading = ref(false)

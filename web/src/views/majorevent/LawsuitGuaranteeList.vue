@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import {
   getLawsuits, createLawsuit, updateLawsuit, deleteLawsuit, updateLawsuitStatus,
   getGuarantees, createGuarantee, updateGuarantee, deleteGuarantee, getExpiringGuarantees
@@ -22,6 +22,7 @@ const lawsuitDialogVisible = ref(false)
 const lawsuitEditing = ref(false)
 const lawsuitFormRef = ref<any>(null)
 const lawsuitForm = ref({
+  id: undefined as number | undefined,
   eventId: undefined as number | undefined,
   caseNo: '',
   court: '',
@@ -153,6 +154,7 @@ const guaranteeDialogVisible = ref(false)
 const guaranteeEditing = ref(false)
 const guaranteeFormRef = ref<any>(null)
 const guaranteeForm = ref({
+  id: undefined as number | undefined,
   eventId: undefined as number | undefined,
   guaranteeType: '',
   beneficiary: '',
@@ -293,7 +295,7 @@ function formatCurrency(val: number | null | undefined): string {
   return '¥' + Number(val).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-function formatTime(time: string): string {
+function _formatTime(time: string): string {
   return time?.replace('T', ' ').substring(0, 16) || ''
 }
 

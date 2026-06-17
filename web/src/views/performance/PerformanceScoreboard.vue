@@ -137,7 +137,7 @@ const passRateColor = computed(() => {
   return '#e6a23c'
 })
 
-const scoreColor = (score: number) => {
+const scoreColor = (score: number | null | undefined) => {
   if (score == null) return '#909399'
   if (score >= 90) return '#67c23a'
   if (score >= 70) return '#409eff'
@@ -145,7 +145,7 @@ const scoreColor = (score: number) => {
   return '#f56c6c'
 }
 
-const scoreTag = (score: number) => {
+const scoreTag = (score: number | null | undefined) => {
   if (score == null) return 'info'
   if (score >= 90) return 'success'
   if (score >= 70) return 'primary'
@@ -168,7 +168,7 @@ function renderChart() {
 
   chartInstance.setOption({
     radar: {
-      indicator: names.map((name, i) => ({
+      indicator: names.map((name, _i) => ({
         name,
         max: Math.max(100, Math.ceil(maxScore / 10) * 10),
       })),
