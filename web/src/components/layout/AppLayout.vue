@@ -60,6 +60,13 @@
             <el-menu-item index="/depreciation"><span>折旧管理</span></el-menu-item>
           </el-sub-menu>
 
+          <el-sub-menu index="performance">
+            <template #title><el-icon><DataAnalysis /></el-icon><span>业绩考核与薪酬</span></template>
+            <el-menu-item index="/performance/indicators"><span>考核指标配置</span></el-menu-item>
+            <el-menu-item index="/performance/scoreboard"><span>考核评分看板</span></el-menu-item>
+            <el-menu-item index="/performance/salary-budgets"><span>薪酬总额管控</span></el-menu-item>
+          </el-sub-menu>
+
           <el-sub-menu index="approval">
             <template #title><el-icon><DocumentChecked /></el-icon><span>审批工作流</span></template>
             <el-menu-item index="/approval/pending"><span>待我审批</span></el-menu-item>

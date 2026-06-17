@@ -155,7 +155,12 @@ const router = createRouter({
         { path: 'finance/reports', name: 'FinReportList', component: () => import('@/views/finance/FinanceReportList.vue') },
         { path: 'finance/indicators', name: 'FinIndicatorDashboard', component: () => import('@/views/finance/FinanceIndicatorDashboard.vue') },
         { path: 'finance/funds', name: 'FinFundMonitor', component: () => import('@/views/finance/FundMonitor.vue') },
-        { path: 'finance/budgets', name: 'FinBudgetExecution', component: () => import('@/views/finance/BudgetExecution.vue') }
+        { path: 'finance/budgets', name: 'FinBudgetExecution', component: () => import('@/views/finance/BudgetExecution.vue') },
+
+        // ===== 业绩考核与薪酬管理 =====
+        { path: 'performance/indicators', name: 'PerfIndicatorManage', component: () => import('@/views/performance/IndicatorManage.vue') },
+        { path: 'performance/scoreboard', name: 'PerfScoreboard', component: () => import('@/views/performance/PerformanceScoreboard.vue') },
+        { path: 'performance/salary-budgets', name: 'PerfSalaryBudgetControl', component: () => import('@/views/performance/SalaryBudgetControl.vue') }
       ]
     }
   ]
