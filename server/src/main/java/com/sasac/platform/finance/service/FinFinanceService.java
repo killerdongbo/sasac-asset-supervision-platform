@@ -2,6 +2,8 @@ package com.sasac.platform.finance.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sasac.platform.common.exception.BusinessException;
 import com.sasac.platform.finance.dto.BudgetDTO;
 import com.sasac.platform.finance.dto.FundMonitorDTO;
@@ -37,6 +39,7 @@ public class FinFinanceService {
     private final FinIndicatorMapper indicatorMapper;
     private final FinFundMonitorMapper fundMonitorMapper;
     private final FinBudgetMapper budgetMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // ==================== Reports ====================
 
@@ -345,20 +348,13 @@ public class FinFinanceService {
         if (report == null || report.getReportData() == null) {
             return BigDecimal.ZERO;
         }
-        // Simplified extraction: in production use Jackson ObjectMapper
-        // Expected format: {"totalAssets": 1000000, "totalLiabilities": 500000, ...}
         try {
-            String data = report.getReportData();
-            String key = "\"" + fieldName + "\"";
-            int keyIdx = data.indexOf(key);
-            if (keyIdx < 0) return BigDecimal.ZERO;
-            int colonIdx = data.indexOf(":", keyIdx + key.length());
-            if (colonIdx < 0) return BigDecimal.ZERO;
-            int endIdx = data.indexOf(",", colonIdx + 1);
-            if (endIdx < 0) endIdx = data.indexOf("}", colonIdx + 1);
-            if (endIdx < 0) return BigDecimal.ZERO;
-            String valStr = data.substring(colonIdx + 1, endIdx).trim();
-            return new BigDecimal(valStr);
+            JsonNode root = objectMapper.readTree(report.getReportData());
+            JsonNode node = root.get(fieldName);
+            if (node == null) {
+                return BigDecimal.ZERO;
+            }
+            return new BigDecimal(node.asText());
         } catch (Exception e) {
             return BigDecimal.ZERO;
         }

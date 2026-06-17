@@ -79,9 +79,15 @@ public class MeMajorEventService {
         existing.setOrgId(dto.getOrgId());
         existing.setEventType(dto.getEventType());
         existing.setTitle(dto.getTitle());
-        existing.setDescription(dto.getDescription());
-        existing.setImpactAssessment(dto.getImpactAssessment());
-        existing.setHandlingPlan(dto.getHandlingPlan());
+        if (dto.getDescription() != null) {
+            existing.setDescription(dto.getDescription());
+        }
+        if (dto.getImpactAssessment() != null) {
+            existing.setImpactAssessment(dto.getImpactAssessment());
+        }
+        if (dto.getHandlingPlan() != null) {
+            existing.setHandlingPlan(dto.getHandlingPlan());
+        }
         existing.setUpdatedAt(LocalDateTime.now());
         meEventMapper.updateById(existing);
         return meEventMapper.selectById(id);
@@ -232,17 +238,39 @@ public class MeMajorEventService {
         if (existing == null) {
             throw new BusinessException("诉讼记录不存在");
         }
-        existing.setEventId(dto.getEventId());
-        existing.setCaseNo(dto.getCaseNo());
-        existing.setCourt(dto.getCourt());
-        existing.setPlaintiff(dto.getPlaintiff());
-        existing.setDefendant(dto.getDefendant());
-        existing.setClaimAmount(dto.getClaimAmount());
-        existing.setJudgmentAmount(dto.getJudgmentAmount());
-        existing.setLawFirm(dto.getLawFirm());
-        existing.setAttorney(dto.getAttorney());
-        existing.setTrialProgress(dto.getTrialProgress());
-        existing.setJudgmentDate(dto.getJudgmentDate());
+        if (dto.getEventId() != null) {
+            existing.setEventId(dto.getEventId());
+        }
+        if (dto.getCaseNo() != null) {
+            existing.setCaseNo(dto.getCaseNo());
+        }
+        if (dto.getCourt() != null) {
+            existing.setCourt(dto.getCourt());
+        }
+        if (dto.getPlaintiff() != null) {
+            existing.setPlaintiff(dto.getPlaintiff());
+        }
+        if (dto.getDefendant() != null) {
+            existing.setDefendant(dto.getDefendant());
+        }
+        if (dto.getClaimAmount() != null) {
+            existing.setClaimAmount(dto.getClaimAmount());
+        }
+        if (dto.getJudgmentAmount() != null) {
+            existing.setJudgmentAmount(dto.getJudgmentAmount());
+        }
+        if (dto.getLawFirm() != null) {
+            existing.setLawFirm(dto.getLawFirm());
+        }
+        if (dto.getAttorney() != null) {
+            existing.setAttorney(dto.getAttorney());
+        }
+        if (dto.getTrialProgress() != null) {
+            existing.setTrialProgress(dto.getTrialProgress());
+        }
+        if (dto.getJudgmentDate() != null) {
+            existing.setJudgmentDate(dto.getJudgmentDate());
+        }
         if (dto.getStatus() != null) {
             existing.setStatus(dto.getStatus());
         }
@@ -364,14 +392,30 @@ public class MeMajorEventService {
         if (existing == null) {
             throw new BusinessException("担保记录不存在");
         }
-        existing.setEventId(dto.getEventId());
-        existing.setGuaranteeType(dto.getGuaranteeType());
-        existing.setBeneficiary(dto.getBeneficiary());
-        existing.setGuaranteeAmount(dto.getGuaranteeAmount());
-        existing.setGuaranteePeriodStart(dto.getGuaranteePeriodStart());
-        existing.setGuaranteePeriodEnd(dto.getGuaranteePeriodEnd());
-        existing.setCounterGuarantee(dto.getCounterGuarantee());
-        existing.setRiskLevel(dto.getRiskLevel());
+        if (dto.getEventId() != null) {
+            existing.setEventId(dto.getEventId());
+        }
+        if (dto.getGuaranteeType() != null) {
+            existing.setGuaranteeType(dto.getGuaranteeType());
+        }
+        if (dto.getBeneficiary() != null) {
+            existing.setBeneficiary(dto.getBeneficiary());
+        }
+        if (dto.getGuaranteeAmount() != null) {
+            existing.setGuaranteeAmount(dto.getGuaranteeAmount());
+        }
+        if (dto.getGuaranteePeriodStart() != null) {
+            existing.setGuaranteePeriodStart(dto.getGuaranteePeriodStart());
+        }
+        if (dto.getGuaranteePeriodEnd() != null) {
+            existing.setGuaranteePeriodEnd(dto.getGuaranteePeriodEnd());
+        }
+        if (dto.getCounterGuarantee() != null) {
+            existing.setCounterGuarantee(dto.getCounterGuarantee());
+        }
+        if (dto.getRiskLevel() != null) {
+            existing.setRiskLevel(dto.getRiskLevel());
+        }
         if (dto.getStatus() != null) {
             existing.setStatus(dto.getStatus());
         }

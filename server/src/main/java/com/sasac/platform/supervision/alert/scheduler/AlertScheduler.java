@@ -1,6 +1,9 @@
 package com.sasac.platform.supervision.alert.scheduler;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sasac.platform.asset.entity.Asset;
 import com.sasac.platform.asset.inspection.entity.InspectionTask;
 import com.sasac.platform.asset.inspection.mapper.InspectionTaskMapper;
@@ -30,6 +33,7 @@ public class AlertScheduler {
     private final InspectionTaskMapper inspectionTaskMapper;
     private final AssetMapper assetMapper;
     private final AlertRecordMapper alertRecordMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Daily scan for inspection tasks that are overdue.
@@ -70,9 +74,15 @@ public class AlertScheduler {
                 record.setTitle("巡检任务已逾期");
                 record.setContent("巡检任务「" + task.getTaskName() + "」截止日期为 "
                         + task.getEndDate() + "，状态为 " + task.getStatus() + "，请及时处理。");
-                record.setAlertData("{\"taskId\":" + task.getId()
-                        + ",\"taskName\":\"" + task.getTaskName()
-                        + "\",\"endDate\":\"" + task.getEndDate() + "\"}");
+                try {
+                    ObjectNode alertData = objectMapper.createObjectNode();
+                    alertData.put("taskId", task.getId());
+                    alertData.put("taskName", task.getTaskName());
+                    alertData.put("endDate", task.getEndDate() != null ? task.getEndDate().toString() : "");
+                    record.setAlertData(objectMapper.writeValueAsString(alertData));
+                } catch (Exception e) {
+                    record.setAlertData("{}");
+                }
                 record.setStatus("ACTIVE");
                 record.setTenantId(task.getTenantId());
                 record.setRefId(task.getId());
@@ -129,10 +139,16 @@ public class AlertScheduler {
                 record.setTitle("闲置资产超过90天");
                 record.setContent("资产「" + asset.getName() + "」（编码：" + asset.getAssetCode()
                         + "）已闲置超过90天，请核实使用状态或安排处置。");
-                record.setAlertData("{\"assetId\":" + asset.getId()
-                        + ",\"assetName\":\"" + asset.getName()
-                        + "\",\"assetCode\":\"" + asset.getAssetCode()
-                        + "\",\"updatedAt\":\"" + asset.getUpdatedAt() + "\"}");
+                try {
+                    ObjectNode alertData = objectMapper.createObjectNode();
+                    alertData.put("assetId", asset.getId());
+                    alertData.put("assetName", asset.getName());
+                    alertData.put("assetCode", asset.getAssetCode());
+                    alertData.put("updatedAt", asset.getUpdatedAt() != null ? asset.getUpdatedAt().toString() : "");
+                    record.setAlertData(objectMapper.writeValueAsString(alertData));
+                } catch (Exception e) {
+                    record.setAlertData("{}");
+                }
                 record.setStatus("ACTIVE");
                 record.setTenantId(asset.getTenantId());
                 record.setRefId(asset.getId());

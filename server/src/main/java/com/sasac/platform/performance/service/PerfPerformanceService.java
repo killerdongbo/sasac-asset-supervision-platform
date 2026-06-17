@@ -71,13 +71,7 @@ public class PerfPerformanceService {
             // Auto-calculate initial score if actualValue is provided
             if (entity.getActualValue() != null && entity.getTargetValue() != null
                     && entity.getTargetValue().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal ratio = entity.getActualValue()
-                        .multiply(new BigDecimal("100"))
-                        .divide(entity.getTargetValue(), 2, RoundingMode.HALF_UP);
-                BigDecimal score = ratio.min(new BigDecimal("100"))
-                        .multiply(entity.getWeight())
-                        .divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP);
-                entity.setScore(score);
+                entity.setScore(calculateSingleScore(entity.getActualValue(), entity.getTargetValue(), entity.getWeight()));
             }
 
             indicatorDefMapper.insert(entity);
@@ -107,13 +101,7 @@ public class PerfPerformanceService {
 
         // Recalculate score: score = min(100, actual/target * 100) * weight / 100
         if (indicator.getTargetValue() != null && indicator.getTargetValue().compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal ratio = actualValue
-                    .multiply(new BigDecimal("100"))
-                    .divide(indicator.getTargetValue(), 2, RoundingMode.HALF_UP);
-            BigDecimal rawScore = ratio.min(new BigDecimal("100"))
-                    .multiply(indicator.getWeight())
-                    .divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP);
-            indicator.setScore(rawScore);
+            indicator.setScore(calculateSingleScore(actualValue, indicator.getTargetValue(), indicator.getWeight()));
         }
 
         indicatorDefMapper.updateById(indicator);
@@ -141,13 +129,7 @@ public class PerfPerformanceService {
         for (PerfIndicatorDef indicator : indicators) {
             if (indicator.getActualValue() != null && indicator.getTargetValue() != null
                     && indicator.getTargetValue().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal ratio = indicator.getActualValue()
-                        .multiply(new BigDecimal("100"))
-                        .divide(indicator.getTargetValue(), 2, RoundingMode.HALF_UP);
-                BigDecimal rawScore = ratio.min(new BigDecimal("100"))
-                        .multiply(indicator.getWeight())
-                        .divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP);
-                indicator.setScore(rawScore);
+                indicator.setScore(calculateSingleScore(indicator.getActualValue(), indicator.getTargetValue(), indicator.getWeight()));
             } else {
                 indicator.setScore(BigDecimal.ZERO);
             }
@@ -339,5 +321,29 @@ public class PerfPerformanceService {
             throw new BusinessException("激励记录不存在");
         }
         incentiveMapper.deleteById(id);
+    }
+
+    // ==================== Private Helpers ====================
+
+    /**
+     * Calculates the weighted score for a single indicator.
+     * <p>
+     * Formula: weighted_score = min(100, actual / target * 100) * weight / 100
+     *
+     * @param actual the actual achieved value
+     * @param target the target value
+     * @param weight the indicator weight percentage
+     * @return the calculated weighted score, or ZERO if target is null or zero
+     */
+    private BigDecimal calculateSingleScore(BigDecimal actual, BigDecimal target, BigDecimal weight) {
+        if (target == null || target.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        if (actual == null) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal ratio = actual.divide(target, 4, RoundingMode.HALF_UP);
+        BigDecimal base = ratio.multiply(new BigDecimal("100")).min(new BigDecimal("100"));
+        return base.multiply(weight).divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP);
     }
 }

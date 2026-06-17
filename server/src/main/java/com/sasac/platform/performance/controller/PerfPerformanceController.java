@@ -2,8 +2,10 @@ package com.sasac.platform.performance.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sasac.platform.common.response.ApiResponse;
+import com.sasac.platform.performance.dto.AdjustBudgetDTO;
 import com.sasac.platform.performance.dto.IncentiveDTO;
 import com.sasac.platform.performance.dto.IndicatorDefDTO;
+import com.sasac.platform.performance.dto.RecordActualDTO;
 import com.sasac.platform.performance.dto.SalaryBudgetDTO;
 import com.sasac.platform.performance.entity.PerfIncentive;
 import com.sasac.platform.performance.entity.PerfIndicatorDef;
@@ -22,9 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST controller for performance and compensation management.
@@ -54,8 +54,8 @@ public class PerfPerformanceController {
     @PutMapping("/indicators/{id}/actual")
     public ResponseEntity<ApiResponse<PerfIndicatorDef>> recordActual(
             @PathVariable Long id,
-            @RequestBody Map<String, BigDecimal> body) {
-        PerfIndicatorDef updated = performanceService.recordActual(id, body.get("actualValue"));
+            @Valid @RequestBody RecordActualDTO body) {
+        PerfIndicatorDef updated = performanceService.recordActual(id, body.getActualValue());
         return ResponseEntity.ok(ApiResponse.success(updated));
     }
 
@@ -101,10 +101,8 @@ public class PerfPerformanceController {
     @PostMapping("/salary-budgets/{id}/adjust")
     public ResponseEntity<ApiResponse<PerfSalaryBudget>> adjustBudget(
             @PathVariable Long id,
-            @RequestBody Map<String, Object> body) {
-        BigDecimal adjustment = new BigDecimal(body.get("adjustment").toString());
-        String reason = (String) body.get("reason");
-        PerfSalaryBudget budget = performanceService.adjustBudget(id, adjustment, reason);
+            @Valid @RequestBody AdjustBudgetDTO body) {
+        PerfSalaryBudget budget = performanceService.adjustBudget(id, body.getAdjustment(), body.getReason());
         return ResponseEntity.ok(ApiResponse.success(budget));
     }
 

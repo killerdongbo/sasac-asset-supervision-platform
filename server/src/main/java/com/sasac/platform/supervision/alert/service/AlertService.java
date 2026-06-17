@@ -217,9 +217,12 @@ public class AlertService {
             long totalCount = hrEmployeeMapper.selectCount(totalWrapper);
 
             LambdaQueryWrapper<HrEmployee> resignedMonthWrapper = new LambdaQueryWrapper<>();
+            LocalDate monthStart = LocalDate.now().withDayOfMonth(1);
+            LocalDate monthEnd = monthStart.plusMonths(1);
             resignedMonthWrapper.eq(HrEmployee::getTenantId, tenantId)
-                    .eq(HrEmployee::getStatus, "RESIGNED");
-            // approximate: count all resigned records in the system as indicator
+                    .eq(HrEmployee::getStatus, "RESIGNED")
+                    .ge(HrEmployee::getUpdatedAt, monthStart.atStartOfDay())
+                    .lt(HrEmployee::getUpdatedAt, monthEnd.atStartOfDay());
             long resignedCount = hrEmployeeMapper.selectCount(resignedMonthWrapper);
 
             if (totalCount > 0 && (resignedCount * 100.0 / totalCount) > 5.0) {
