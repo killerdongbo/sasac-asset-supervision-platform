@@ -129,6 +129,13 @@ const router = createRouter({
         { path: 'projects/:id', name: 'PmProjectDetail', component: () => import('@/views/project/ProjectDashboard.vue') },
         { path: 'projects/:id/edit', name: 'PmProjectEdit', component: () => import('@/views/project/ProjectForm.vue') },
 
+        // ===== 投资管理 =====
+        { path: 'investments', name: 'InvestPortfolioList', component: () => import('@/views/investment/PortfolioList.vue') },
+        { path: 'investments/create', name: 'InvestProjectCreate', component: () => import('@/views/investment/InvestForm.vue') },
+        { path: 'investments/:id', name: 'InvestProjectDetail', component: () => import('@/views/investment/InvestDashboard.vue') },
+        { path: 'investments/:id/edit', name: 'InvestProjectEdit', component: () => import('@/views/investment/InvestForm.vue') },
+        { path: 'investments/:id/equity-tree', name: 'InvestEquityTree', component: () => import('@/views/investment/EquityTree.vue') },
+
         // ===== 导出中心 =====
         { path: 'exports', name: 'ExportCenter', component: () => import('@/views/export/ExportCenter.vue') }
       ]
