@@ -96,6 +96,12 @@ const router = createRouter({
         { path: 'audit-logs', name: 'AuditLogList', component: () => import('@/views/audit/LogList.vue') },
         { path: 'audit-lifecycle', name: 'AssetLifecycle', component: () => import('@/views/audit/Lifecycle.vue') },
 
+        // ===== HR 人力资源 =====
+        { path: 'hr/employees', name: 'HrEmployeeList', component: () => import('@/views/hr/EmployeeList.vue') },
+        { path: 'hr/employees/create', name: 'HrEmployeeCreate', component: () => import('@/views/hr/EmployeeForm.vue') },
+        { path: 'hr/employees/:id', name: 'HrEmployeeDetail', component: () => import('@/views/hr/EmployeeDetail.vue') },
+        { path: 'hr/employees/:id/edit', name: 'HrEmployeeEdit', component: () => import('@/views/hr/EmployeeForm.vue') },
+
         // ===== 系统管理 =====
         { path: 'users', name: 'UserManage', component: () => import('@/views/system/UserManage.vue') },
         { path: 'roles', name: 'RoleManage', component: () => import('@/views/system/RoleManage.vue') },
