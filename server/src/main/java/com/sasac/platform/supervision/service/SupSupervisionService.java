@@ -110,8 +110,10 @@ public class SupSupervisionService {
         SupAuditFinding finding = new SupAuditFinding();
         finding.setTenantId(dto.getTenantId());
         finding.setPlanId(dto.getPlanId());
-        // Auto-generate finding number: FX-{timestamp}
-        finding.setFindingNo("FX-" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now()));
+        // Auto-generate finding number: FX-{timestamp}-{random}
+        String ts = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
+        int rand = (int) (Math.random() * 9000) + 1000;
+        finding.setFindingNo("FX-" + ts + "-" + rand);
         finding.setTitle(dto.getTitle());
         finding.setSeverity(dto.getSeverity());
         finding.setDescription(dto.getDescription());
@@ -234,8 +236,10 @@ public class SupSupervisionService {
     public SupViolationCase openCase(CaseDTO dto) {
         SupViolationCase violationCase = new SupViolationCase();
         violationCase.setTenantId(dto.getTenantId());
-        // Auto-generate case number: WJ-{timestamp}
-        violationCase.setCaseNo("WJ-" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now()));
+        // Auto-generate case number: WJ-{timestamp}-{random}
+        String ts = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
+        int rand = (int) (Math.random() * 9000) + 1000;
+        violationCase.setCaseNo("WJ-" + ts + "-" + rand);
         violationCase.setCaseTitle(dto.getCaseTitle());
         violationCase.setViolationType(dto.getViolationType());
         violationCase.setSuspectId(dto.getSuspectId());

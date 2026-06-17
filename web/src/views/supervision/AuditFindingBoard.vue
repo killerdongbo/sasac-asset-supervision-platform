@@ -8,7 +8,8 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const rectDialogVisible = ref(false)
 const currentFinding = ref<any>(null)
-const formRef = ref<any>(null)
+const findingFormRef = ref<any>(null)
+const rectFormRef = ref<any>(null)
 
 const form = ref({
   tenantId: 1,
@@ -51,7 +52,7 @@ function openCreate() {
 }
 
 async function handleSave() {
-  const valid = await formRef.value?.validate().catch(() => false)
+  const valid = await findingFormRef.value?.validate().catch(() => false)
   if (!valid) return
   try {
     await recordFinding(form.value)
@@ -70,7 +71,7 @@ function openRectDialog(row: any) {
 }
 
 async function handleAssignRect() {
-  const valid = await formRef.value?.validate().catch(() => false)
+  const valid = await rectFormRef.value?.validate().catch(() => false)
   if (!valid) return
   try {
     await assignRectification(currentFinding.value.id, rectForm.value)
@@ -118,7 +119,7 @@ onMounted(fetch)
     </el-table>
 
     <el-dialog v-model="dialogVisible" title="记录审计问题" width="600px">
-      <el-form ref="formRef" :model="form" label-width="100px">
+      <el-form ref="findingFormRef" :model="form" label-width="100px">
         <el-form-item label="问题标题" prop="title" :rules="[{ required: true, message: '请输入问题标题' }]">
           <el-input v-model="form.title" />
         </el-form-item>
@@ -144,7 +145,7 @@ onMounted(fetch)
     </el-dialog>
 
     <el-dialog v-model="rectDialogVisible" title="创建整改任务" width="600px">
-      <el-form ref="formRef" :model="rectForm" label-width="120px">
+      <el-form ref="rectFormRef" :model="rectForm" label-width="120px">
         <el-form-item label="任务标题" prop="taskTitle" :rules="[{ required: true, message: '请输入任务标题' }]">
           <el-input v-model="rectForm.taskTitle" />
         </el-form-item>
