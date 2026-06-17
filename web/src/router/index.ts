@@ -163,6 +163,11 @@ const router = createRouter({
         { path: 'supervision/rectifications', name: 'SupRectificationTracker', component: () => import('@/views/supervision/RectificationTracker.vue') },
         { path: 'supervision/cases', name: 'SupViolationCaseList', component: () => import('@/views/supervision/ViolationCaseList.vue') },
 
+        // ===== 重大事项管理 =====
+        { path: 'major-events', name: 'MeEventList', component: () => import('@/views/majorevent/EventList.vue') },
+        { path: 'major-events/:id', name: 'MeEventDetail', component: () => import('@/views/majorevent/EventDetail.vue') },
+        { path: 'major-events/lawsuits-guarantees', name: 'MeLawsuitGuaranteeList', component: () => import('@/views/majorevent/LawsuitGuaranteeList.vue') },
+
         // ===== 业绩考核与薪酬管理 =====
         { path: 'performance/indicators', name: 'PerfIndicatorManage', component: () => import('@/views/performance/IndicatorManage.vue') },
         { path: 'performance/scoreboard', name: 'PerfScoreboard', component: () => import('@/views/performance/PerformanceScoreboard.vue') },
