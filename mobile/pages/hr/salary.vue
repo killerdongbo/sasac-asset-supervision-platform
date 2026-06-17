@@ -10,59 +10,93 @@
     <view class="salary-card">
       <view class="card-header">
         <text class="card-title">工资明细</text>
-        <text class="card-period">2025年06月</text>
+        <text class="card-period">{{ currentMonth }}</text>
       </view>
 
-      <view class="salary-item">
-        <text class="item-label">基本工资</text>
-        <text class="item-value">¥8,500.00</text>
-      </view>
-      <view class="salary-item">
-        <text class="item-label">岗位津贴</text>
-        <text class="item-value">¥2,000.00</text>
-      </view>
-      <view class="salary-item">
-        <text class="item-label">绩效奖金</text>
-        <text class="item-value">¥3,500.00</text>
-      </view>
-      <view class="salary-item">
-        <text class="item-label">加班补贴</text>
-        <text class="item-value">¥800.00</text>
+      <view class="salary-item" v-for="item in earnings" :key="item.label">
+        <text class="item-label">{{ item.label }}</text>
+        <text class="item-value">{{ formatMoney(item.value) }}</text>
       </view>
 
       <view class="divider"></view>
 
-      <view class="salary-item deduction">
-        <text class="item-label">养老保险</text>
-        <text class="item-value">-¥850.00</text>
-      </view>
-      <view class="salary-item deduction">
-        <text class="item-label">医疗保险</text>
-        <text class="item-value">-¥212.50</text>
-      </view>
-      <view class="salary-item deduction">
-        <text class="item-label">住房公积金</text>
-        <text class="item-value">-¥1,020.00</text>
-      </view>
-      <view class="salary-item deduction">
-        <text class="item-label">个人所得税</text>
-        <text class="item-value">-¥345.60</text>
+      <view class="salary-item deduction" v-for="item in deductions" :key="item.label">
+        <text class="item-label">{{ item.label }}</text>
+        <text class="item-value">{{ formatMoney(item.value) }}</text>
       </view>
 
       <view class="divider"></view>
 
       <view class="salary-item total">
         <text class="item-label">实发金额</text>
-        <text class="item-value total-value">¥12,371.90</text>
+        <text class="item-value total-value">{{ formatMoney(netSalary) }}</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/store/index'
+import { getSalaryRecords } from '@/api/hr'
 
-const currentMonth = ref('2025-06')
+const authStore = useAuthStore()
+
+const currentMonth = ref('')
+const salaryData = ref(null)
+const loading = ref(false)
+
+const earnings = ref([])
+const deductions = ref([])
+const netSalary = ref(0)
+
+async function fetchSalary() {
+  loading.value = true
+  try {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+    currentMonth.value = `${year}-${String(month).padStart(2, '0')}`
+
+    const res = await getSalaryRecords({
+      tenantId: authStore.tenantId,
+      employeeId: authStore.userInfo?.id,
+      salaryYear: year,
+      salaryMonth: month
+    })
+
+    if (res.success && res.data && res.data.length > 0) {
+      const record = res.data[0]
+      salaryData.value = record
+      earnings.value = [
+        { label: '基本工资', value: record.baseSalary || 0 },
+        { label: '岗位津贴', value: record.allowance || 0 },
+        { label: '绩效奖金', value: record.performancePay || 0 },
+        { label: '加班补贴', value: record.overtimePay || 0 }
+      ]
+      deductions.value = [
+        { label: '养老保险', value: -(record.socialInsurance || 0) },
+        { label: '医疗保险', value: -(record.medicalInsurance || 0) },
+        { label: '住房公积金', value: -(record.housingFund || 0) },
+        { label: '个人所得税', value: -(record.tax || 0) }
+      ]
+      netSalary.value = record.netSalary || 0
+    }
+  } catch (err) {
+    console.error('Failed to fetch salary:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function formatMoney(val) {
+  if (!val && val !== 0) return '¥0.00'
+  return '¥' + Number(val).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+onMounted(() => {
+  fetchSalary()
+})
 </script>
 
 <style lang="scss">

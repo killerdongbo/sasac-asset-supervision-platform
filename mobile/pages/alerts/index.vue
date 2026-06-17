@@ -19,15 +19,15 @@
     <!-- 列表 -->
     <view class="alert-list">
       <view class="alert-item" v-for="alert in alertList" :key="alert.id">
-        <view class="alert-icon" :class="alert.severity.toLowerCase()">
+        <view class="alert-icon" :class="getSeverityIcon(alert.severity)">
           <text>{{ alert.severity === 'CRITICAL' ? '!!' : alert.severity === 'WARNING' ? '!' : 'i' }}</text>
         </view>
         <view class="alert-content">
           <view class="alert-top">
             <text class="alert-title">{{ alert.title }}</text>
             <uni-tag
-              :text="alert.severity === 'CRITICAL' ? '严重' : alert.severity === 'WARNING' ? '警告' : '提示'"
-              :type="alert.severity === 'CRITICAL' ? 'error' : alert.severity === 'WARNING' ? 'warning' : 'default'"
+              :text="getSeverityText(alert.severity)"
+              :type="getSeverityType(alert.severity)"
               size="small"
             />
           </view>
@@ -43,20 +43,64 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getAlerts, getAlertCounts } from '@/api/alert'
 
-const criticalCount = ref(2)
-const warningCount = ref(4)
-const infoCount = ref(6)
+const criticalCount = ref(0)
+const warningCount = ref(0)
+const infoCount = ref(0)
+const alertList = ref([])
+const loading = ref(false)
 
-const alertList = ref([
-  { id: 1, title: '关键岗位空缺预警', content: '财务总监岗位已空缺超过30天', severity: 'CRITICAL', time: '2025-06-17 10:30' },
-  { id: 2, title: '项目预算执行预警', content: '智慧园区项目预算执行率达92%', severity: 'CRITICAL', time: '2025-06-17 09:15' },
-  { id: 3, title: '产权交易偏差预警', content: '某资产挂牌交易价格偏差18.5%', severity: 'WARNING', time: '2025-06-16 14:00' },
-  { id: 4, title: '投资ROI预警', content: '智慧城市公司ROI低于预期32%', severity: 'WARNING', time: '2025-06-16 11:20' },
-  { id: 5, title: '整改超期预警', content: '审计整改任务已超期15天', severity: 'WARNING', time: '2025-06-15 16:00' },
-  { id: 6, title: '项目进度预警', content: '国资云平台项目超计划工期35天', severity: 'WARNING', time: '2025-06-15 14:30' }
-])
+function getSeverityText(severity) {
+  const map = { CRITICAL: '严重', WARNING: '警告', INFO: '提示' }
+  return map[severity] || severity
+}
+
+function getSeverityType(severity) {
+  const map = { CRITICAL: 'error', WARNING: 'warning', INFO: 'default' }
+  return map[severity] || 'default'
+}
+
+function getSeverityIcon(severity) {
+  const map = { CRITICAL: 'critical', WARNING: 'warning', INFO: 'info' }
+  return map[severity] || 'info'
+}
+
+async function fetchData() {
+  loading.value = true
+  try {
+    const [alertsRes, countsRes] = await Promise.allSettled([
+      getAlerts({ limit: 50 }),
+      getAlertCounts()
+    ])
+
+    if (alertsRes.status === 'fulfilled' && alertsRes.value?.success && alertsRes.value?.data) {
+      alertList.value = alertsRes.value.data.map(item => ({
+        id: item.id,
+        title: item.title || item.alertName || '预警',
+        content: item.content || item.description || '',
+        severity: item.severity || item.level || 'INFO',
+        time: item.createdAt || item.alertTime || '-'
+      }))
+    }
+
+    if (countsRes.status === 'fulfilled' && countsRes.value?.success && countsRes.value?.data) {
+      const counts = countsRes.value.data
+      criticalCount.value = counts.critical || 0
+      warningCount.value = counts.warning || 0
+      infoCount.value = counts.info || 0
+    }
+  } catch (err) {
+    console.error('Failed to fetch alerts:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style lang="scss">

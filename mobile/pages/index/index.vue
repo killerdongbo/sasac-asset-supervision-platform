@@ -49,25 +49,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useAuthStore } from '@/store/index'
+import { getPendingApprovals } from '@/api/approval'
+import { getAlertCounts } from '@/api/alert'
 
-const userName = ref('管理员')
-const userOrg = ref('湛江市国资委')
-const pendingCount = ref(3)
-const pendingList = ref([
-  { title: '资产入库审批 - 服务器采购', time: '10:30', color: '#f56c6c' },
-  { title: '项目进度填报 - 智慧园区', time: '09:15', color: '#e6a23c' },
-  { title: '工资确认 - 2025年6月', time: '昨日', color: '#409eff' }
-])
+const authStore = useAuthStore()
+
+const userName = computed(() => authStore.userInfo?.realName || authStore.userInfo?.username || '管理员')
+const userOrg = computed(() => authStore.userInfo?.orgName || '湛江市国资委')
+const pendingCount = ref(0)
+const pendingList = ref([])
 
 const menuItems = [
-  { key: 'pending', label: '待审批', icon: '📋', route: '/pages/approval/list', bgColor: '#fef0f0', badge: 3 },
+  { key: 'pending', label: '待审批', icon: '📋', route: '/pages/approval/list', bgColor: '#fef0f0', badge: 0 },
   { key: 'asset', label: '资产查询', icon: '🏢', route: '', bgColor: '#ecf5ff', badge: 0 },
   { key: 'salary', label: '工资条', icon: '💰', route: '/pages/hr/salary', bgColor: '#f0f9eb', badge: 0 },
   { key: 'project', label: '项目进度', icon: '📊', route: '/pages/project/progress', bgColor: '#fdf6ec', badge: 0 },
   { key: 'invest', label: '投资组合', icon: '📈', route: '/pages/invest/portfolio', bgColor: '#fef0f0', badge: 0 },
   { key: 'finance', label: '财务快报', icon: '📉', route: '/pages/finance/snapshot', bgColor: '#ecf5ff', badge: 0 },
-  { key: 'alert', label: '预警消息', icon: '⚠️', route: '/pages/alerts/index', bgColor: '#fef0f0', badge: 2 },
+  { key: 'alert', label: '预警消息', icon: '⚠️', route: '/pages/alerts/index', bgColor: '#fef0f0', badge: 0 },
   { key: 'doc', label: '制度文件', icon: '📄', route: '', bgColor: '#f0f9eb', badge: 0 }
 ]
 
@@ -77,8 +78,38 @@ function navigateTo(route) {
   }
 }
 
+async function fetchData() {
+  try {
+    const [approvalRes, alertRes] = await Promise.allSettled([
+      getPendingApprovals({ limit: 5 }),
+      getAlertCounts()
+    ])
+
+    if (approvalRes.status === 'fulfilled' && approvalRes.value?.data) {
+      const items = approvalRes.value.data
+      pendingCount.value = items.length
+      pendingList.value = items.slice(0, 5).map(item => ({
+        title: item.title || item.bizType,
+        time: item.createdAt ? item.createdAt.slice(11, 16) : '',
+        color: item.status === 'PENDING' ? '#f56c6c' : '#e6a23c'
+      }))
+      const pendingItem = menuItems.find(m => m.key === 'pending')
+      if (pendingItem) pendingItem.badge = pendingCount.value
+    }
+
+    if (alertRes.status === 'fulfilled' && alertRes.value?.data) {
+      const counts = alertRes.value.data
+      const totalAlerts = (counts.critical || 0) + (counts.warning || 0)
+      const alertItem = menuItems.find(m => m.key === 'alert')
+      if (alertItem) alertItem.badge = totalAlerts
+    }
+  } catch (err) {
+    console.error('Failed to fetch workbench data:', err)
+  }
+}
+
 onMounted(() => {
-  // TODO: fetch user info and pending tasks from API
+  fetchData()
 })
 </script>
 

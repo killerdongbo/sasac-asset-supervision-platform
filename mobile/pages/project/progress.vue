@@ -46,28 +46,93 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/store/index'
+import { queryProjects, recordProgress, getProgressHistory } from '@/api/project'
 
-const selectedProject = ref('智慧园区二期建设项目')
-const progress = ref(45)
-const completedWork = ref('已完成基础施工和部分设备采购')
-const issues = ref('部分设备到货延迟，影响施工进度')
-const nextPlan = ref('推进主体结构施工，协调设备供应商')
+const authStore = useAuthStore()
 
-const projects = ['智慧园区二期建设项目', '国资云平台建设', '全市统一监管系统升级']
+const selectedProject = ref('')
+const selectedProjectId = ref(null)
+const projects = ref([])
+const progress = ref(0)
+const completedWork = ref('')
+const issues = ref('')
+const nextPlan = ref('')
+const loading = ref(false)
+
+async function fetchProjects() {
+  try {
+    const res = await queryProjects({ limit: 50 })
+    if (res.success && res.data) {
+      projects.value = res.data
+      if (res.data.length > 0) {
+        selectedProject.value = res.data[0].name
+        selectedProjectId.value = res.data[0].id
+        progress.value = res.data[0].progressPct || 0
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch projects:', err)
+  }
+}
 
 function showProjectPicker() {
+  if (projects.value.length === 0) return
+  const itemList = projects.value.map(p => p.name)
   uni.showActionSheet({
-    itemList: projects,
-    success: (res) => {
-      selectedProject.value = projects[res.tapIndex]
+    itemList,
+    success: async (res) => {
+      const idx = res.tapIndex
+      selectedProject.value = projects.value[idx].name
+      selectedProjectId.value = projects.value[idx].id
+      progress.value = projects.value[idx].progressPct || 0
+      completedWork.value = ''
+      issues.value = ''
+      nextPlan.value = ''
+      try {
+        const historyRes = await getProgressHistory(selectedProjectId.value, { limit: 1 })
+        if (historyRes.success && historyRes.data && historyRes.data.length > 0) {
+          const last = historyRes.data[0]
+          completedWork.value = last.completedWork || ''
+          issues.value = last.issues || ''
+          nextPlan.value = last.nextPlan || ''
+        }
+      } catch (err) {
+        // ignore history load failure
+      }
     }
   })
 }
 
-function handleSubmit() {
-  uni.showToast({ title: '进度提交成功', icon: 'success' })
+async function handleSubmit() {
+  if (!selectedProjectId.value) {
+    uni.showToast({ title: '请选择项目', icon: 'none' })
+    return
+  }
+  loading.value = true
+  try {
+    const res = await recordProgress(selectedProjectId.value, {
+      projectId: selectedProjectId.value,
+      tenantId: Number(authStore.tenantId),
+      reportDate: new Date().toISOString().slice(0, 10),
+      completedWork: completedWork.value,
+      issues: issues.value,
+      nextPlan: nextPlan.value
+    })
+    if (res.success) {
+      uni.showToast({ title: '进度提交成功', icon: 'success' })
+    }
+  } catch (err) {
+    uni.showToast({ title: '提交失败', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
 }
+
+onMounted(() => {
+  fetchProjects()
+})
 </script>
 
 <style lang="scss">

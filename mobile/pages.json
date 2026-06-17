@@ -51,6 +51,20 @@
       "style": {
         "navigationBarTitleText": "预警消息"
       }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationBarBackgroundColor": "#001529",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
   "globalStyle": {
@@ -84,7 +98,7 @@
         "text": "消息"
       },
       {
-        "pagePath": "pages/index/index",
+        "pagePath": "pages/mine/index",
         "iconPath": "static/tab/me.png",
         "selectedIconPath": "static/tab/me-active.png",
         "text": "我的"

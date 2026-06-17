@@ -1,36 +1,44 @@
 <template>
   <view class="decision-approve">
+    <!-- 加载中 -->
+    <view v-if="loading" class="loading-tip">
+      <text>加载中...</text>
+    </view>
+
     <!-- 事项信息 -->
-    <view class="detail-card">
+    <view class="detail-card" v-else-if="item">
       <view class="detail-header">
         <uni-tag text="三重一大" type="error" size="small"></uni-tag>
-        <text class="detail-id">决议编号: JY-2025-006</text>
+        <text class="detail-id">决议编号: {{ item.itemNo || item.id }}</text>
       </view>
-      <text class="detail-title">关于智慧园区二期建设项目投资的决议</text>
+      <text class="detail-title">{{ item.title }}</text>
 
       <view class="info-row">
         <text class="info-label">决议日期</text>
-        <text class="info-value">2025-06-10</text>
+        <text class="info-value">{{ item.createdAt ? item.createdAt.slice(0, 10) : '-' }}</text>
       </view>
       <view class="info-row">
         <text class="info-label">责任部门</text>
-        <text class="info-value">战略发展部</text>
+        <text class="info-value">{{ item.department || '-' }}</text>
       </view>
       <view class="info-row">
         <text class="info-label">项目金额</text>
-        <text class="info-value">¥2,500万</text>
+        <text class="info-value">{{ item.amount ? '¥' + Number(item.amount).toLocaleString() : '-' }}</text>
       </view>
       <view class="info-row">
-        <text class="info-label">截止日期</text>
-        <text class="info-value warn">2025-07-10（剩余23天）</text>
+        <text class="info-label">状态</text>
+        <text class="info-value warn">{{ item.status || 'PENDING' }}</text>
       </view>
 
       <view class="desc-section">
         <text class="desc-label">事项描述</text>
-        <text class="desc-content">
-          同意启动智慧园区二期项目建设，总投资预算2500万元，包含智慧安防、智慧能源、智慧办公三大模块，建设周期12个月。
-        </text>
+        <text class="desc-content">{{ item.description || '暂无描述' }}</text>
       </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view v-else class="loading-tip">
+      <text>暂无待审批事项</text>
     </view>
 
     <!-- 审批操作 -->
@@ -42,27 +50,72 @@
 </template>
 
 <script setup>
-function handleApprove() {
+import { ref, onMounted } from 'vue'
+import { getPendingItems, approveItem } from '@/api/decision'
+
+const item = ref(null)
+const loading = ref(false)
+const itemId = ref('')
+
+onMounted(() => {
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1]
+  if (currentPage?.options?.id) {
+    itemId.value = currentPage.options.id
+  }
+  fetchDetail()
+})
+
+async function fetchDetail() {
+  loading.value = true
+  try {
+    const res = await getPendingItems({ limit: 10 })
+    if (res.success && res.data && res.data.length > 0) {
+      const found = itemId.value
+        ? res.data.find(i => String(i.id) === itemId.value)
+        : res.data[0]
+      if (found) item.value = found
+    }
+  } catch (err) {
+    console.error('Failed to fetch decision item:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleApprove() {
+  if (!item.value) return
   uni.showModal({
     title: '确认',
     content: '确认同意该决议事项？',
-    success: (res) => {
+    success: async (res) => {
       if (res.confirm) {
-        uni.showToast({ title: '审批通过', icon: 'success' })
-        setTimeout(() => uni.navigateBack(), 1500)
+        try {
+          await approveItem(item.value.id, { approved: true, remark: '移动端审批通过' })
+          uni.showToast({ title: '审批通过', icon: 'success' })
+          setTimeout(() => uni.navigateBack(), 1500)
+        } catch (err) {
+          uni.showToast({ title: '操作失败', icon: 'none' })
+        }
       }
     }
   })
 }
 
-function handleReject() {
+async function handleReject() {
+  if (!item.value) return
   uni.showModal({
     title: '确认',
     content: '确认拒绝该决议事项？',
-    success: (res) => {
+    success: async (res) => {
       if (res.confirm) {
-        uni.showToast({ title: '已拒绝', icon: 'none' })
-        setTimeout(() => uni.navigateBack(), 1500)
+        try {
+          await approveItem(item.value.id, { approved: false, remark: '移动端拒绝' })
+          uni.showToast({ title: '已拒绝', icon: 'none' })
+          setTimeout(() => uni.navigateBack(), 1500)
+        } catch (err) {
+          uni.showToast({ title: '操作失败', icon: 'none' })
+        }
       }
     }
   })
@@ -132,6 +185,12 @@ function handleReject() {
   display: flex;
   gap: 12px;
   margin-top: 24px;
+}
+.loading-tip {
+  text-align: center;
+  color: #999;
+  padding: 40px 16px;
+  font-size: 14px;
 }
 .btn-reject {
   flex: 1;

@@ -2,20 +2,13 @@
   <view class="finance-snapshot">
     <!-- 核心指标卡片 -->
     <view class="indicators">
-      <view class="indicator-card">
-        <text class="indicator-label">资产负债率</text>
-        <text class="indicator-value" style="color: #409eff;">58.3%</text>
-        <text class="indicator-trend">较上月 -1.2%</text>
+      <view class="indicator-card" v-for="indicator in indicators" :key="indicator.id">
+        <text class="indicator-label">{{ indicator.indicatorName || indicator.indicatorCode }}</text>
+        <text class="indicator-value" style="color: #409eff;">{{ formatPct(indicator.indicatorValue) }}</text>
+        <text class="indicator-trend">指标值: {{ indicator.indicatorValue }}</text>
       </view>
-      <view class="indicator-card">
-        <text class="indicator-label">净资产收益率(ROE)</text>
-        <text class="indicator-value" style="color: #67c23a;">7.8%</text>
-        <text class="indicator-trend">较上月 +0.5%</text>
-      </view>
-      <view class="indicator-card">
-        <text class="indicator-label">经营活动现金流</text>
-        <text class="indicator-value" style="color: #e6a23c;">¥1.2亿</text>
-        <text class="indicator-trend">较上月 +8.3%</text>
+      <view v-if="indicators.length === 0 && !loading" class="empty-tip">
+        <text>暂无财务指标数据</text>
       </view>
     </view>
 
@@ -39,12 +32,57 @@
 </template>
 
 <script setup>
-const financeData = [
-  { name: '营业收入', current: '45,832', prev: '41,256', change: 11.1 },
-  { name: '净利润', current: '3,568', prev: '3,215', change: 11.0 },
-  { name: '总资产', current: '286,450', prev: '278,900', change: 2.7 },
-  { name: '净资产', current: '119,380', prev: '115,420', change: 3.4 }
-]
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/store/index'
+import { queryIndicators } from '@/api/finance'
+
+const authStore = useAuthStore()
+
+const indicators = ref([])
+const financeData = ref([])
+const loading = ref(false)
+
+function formatValue(val) {
+  if (!val && val !== 0) return '-'
+  const num = Number(val)
+  if (num >= 100000000) return (num / 100000000).toFixed(1) + '亿'
+  if (num >= 10000) return (num / 10000).toFixed(1) + '万'
+  return num.toLocaleString()
+}
+
+function formatPct(val) {
+  if (!val && val !== 0) return '-'
+  return Number(val).toFixed(1) + '%'
+}
+
+async function fetchData() {
+  loading.value = true
+  try {
+    const now = new Date()
+    const res = await queryIndicators({
+      tenantId: authStore.tenantId,
+      periodYear: now.getFullYear()
+    })
+
+    if (res.success && res.data) {
+      indicators.value = res.data.slice(0, 3)
+      financeData.value = res.data.map(item => ({
+        name: item.indicatorName || item.indicatorCode,
+        current: formatValue(item.indicatorValue),
+        prev: '-',
+        change: 0
+      }))
+    }
+  } catch (err) {
+    console.error('Failed to fetch indicators:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style lang="scss">

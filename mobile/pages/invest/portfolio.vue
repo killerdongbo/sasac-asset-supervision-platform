@@ -3,8 +3,8 @@
     <!-- 总览卡片 -->
     <view class="summary-card">
       <text class="summary-label">投资组合总市值</text>
-      <text class="summary-value">¥12.8亿</text>
-      <text class="summary-change">较上月 +5.2%</text>
+      <text class="summary-value">{{ summary.totalValue ? formatAmount(summary.totalValue) : '-' }}</text>
+      <text class="summary-change">较上月 {{ summary.change > 0 ? '+' : '' }}{{ summary.change }}%</text>
     </view>
 
     <!-- 列表 -->
@@ -13,7 +13,7 @@
       <view class="invest-item" v-for="item in investList" :key="item.id">
         <view class="item-top">
           <text class="item-name">{{ item.name }}</text>
-          <uni-tag :text="item.status" :type="item.status === '盈利' ? 'success' : item.status === '持平' ? 'default' : 'danger'" size="small"></uni-tag>
+          <uni-tag :text="item.status" :type="item.statusType" size="small"></uni-tag>
         </view>
         <view class="item-metrics">
           <view class="metric">
@@ -35,13 +35,66 @@
 </template>
 
 <script setup>
-const investList = [
-  { id: 1, name: '湛江港务集团股权投资', amount: '¥3.5亿', equity: '15%', roi: 8.5, status: '盈利' },
-  { id: 2, name: '新能源产业发展基金', amount: '¥2.0亿', equity: '20%', roi: 12.3, status: '盈利' },
-  { id: 3, name: '智慧城市科技公司', amount: '¥1.5亿', equity: '25%', roi: -2.1, status: '亏损' },
-  { id: 4, name: '海港经济区开发项目', amount: '¥3.0亿', equity: '10%', roi: 5.8, status: '持平' },
-  { id: 5, name: '冷链物流基地建设', amount: '¥2.8亿', equity: '30%', roi: 6.2, status: '盈利' }
-]
+import { ref, onMounted } from 'vue'
+import { queryInvestmentProjects, getPortfolioSummary } from '@/api/investment'
+
+const investList = ref([])
+const summary = ref({ totalValue: 0, change: 0 })
+const loading = ref(false)
+
+function formatAmount(val) {
+  if (!val && val !== 0) return '-'
+  const num = Number(val)
+  if (num >= 100000000) return '¥' + (num / 100000000).toFixed(1) + '亿'
+  if (num >= 10000) return '¥' + (num / 10000).toFixed(1) + '万'
+  return '¥' + num.toLocaleString()
+}
+
+function getStatusLabel(roi) {
+  if (roi > 0) return '盈利'
+  if (roi === 0) return '持平'
+  return '亏损'
+}
+
+function getStatusType(roi) {
+  if (roi > 0) return 'success'
+  if (roi === 0) return 'default'
+  return 'danger'
+}
+
+async function fetchData() {
+  loading.value = true
+  try {
+    const [projectsRes, summaryRes] = await Promise.allSettled([
+      queryInvestmentProjects({ limit: 20 }),
+      getPortfolioSummary()
+    ])
+
+    if (projectsRes.status === 'fulfilled' && projectsRes.value?.success && projectsRes.value?.data) {
+      investList.value = projectsRes.value.data.map(item => ({
+        id: item.id,
+        name: item.projectName,
+        amount: formatAmount(item.investAmount),
+        equity: item.equityPct ? item.equityPct + '%' : '-',
+        roi: item.actualRoi || item.expectedRoi || 0,
+        status: getStatusLabel(item.actualRoi || item.expectedRoi || 0),
+        statusType: getStatusType(item.actualRoi || item.expectedRoi || 0)
+      }))
+    }
+
+    if (summaryRes.status === 'fulfilled' && summaryRes.value?.success && summaryRes.value?.data) {
+      summary.value = summaryRes.value.data
+    }
+  } catch (err) {
+    console.error('Failed to fetch investment data:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style lang="scss">

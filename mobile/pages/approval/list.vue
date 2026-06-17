@@ -40,7 +40,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getPendingApprovals, approve } from '@/api/approval'
 
 const tabs = [
   { key: 'all', label: '全部' },
@@ -53,33 +54,63 @@ const tabs = [
 
 const activeTab = ref('all')
 
-const approvalList = ref([
-  { id: 1, title: '服务器采购入库审批', type: 'ASSET', typeLabel: '资产', department: '信息中心', time: '2025-06-17 10:30', status: 'PENDING' },
-  { id: 2, title: '员工转正申请 - 张三', type: 'HR', typeLabel: '人事', department: '人事部', time: '2025-06-17 09:15', status: 'PENDING' },
-  { id: 3, title: '智慧园区项目进度确认', type: 'PROJECT', typeLabel: '项目', department: '工程部', time: '2025-06-16 14:00', status: 'PENDING' },
-  { id: 4, title: '投资方案审批 - 新能源基金', type: 'INVEST', typeLabel: '投资', department: '投资部', time: '2025-06-16 11:20', status: 'PENDING' },
-  { id: 5, title: '董事会决议执行确认', type: 'DECISION', typeLabel: '三重一大', department: '办公室', time: '2025-06-15 16:00', status: 'PENDING' }
-])
+const approvalList = ref([])
+const loading = ref(false)
 
 const filteredList = computed(() => {
   if (activeTab.value === 'all') return approvalList.value
-  return approvalList.value.filter(item => item.type === activeTab.value)
+  return approvalList.value.filter(item => item.bizType === activeTab.value)
 })
+
+function getTypeLabel(type) {
+  const map = { ASSET: '资产', HR: '人事', PROJECT: '项目', INVEST: '投资', DECISION: '三重一大' }
+  return map[type] || type
+}
 
 function handleApprove(item) {
   uni.showActionSheet({
     itemList: ['同意', '拒绝', '查看详情'],
-    success: (res) => {
+    success: async (res) => {
       if (res.tapIndex === 0) {
-        uni.showToast({ title: '已同意', icon: 'success' })
+        try {
+          await approve(item.id, { approved: true, remark: '移动端审批通过' })
+          uni.showToast({ title: '已同意', icon: 'success' })
+          approvalList.value = approvalList.value.filter(i => i.id !== item.id)
+        } catch (err) {
+          uni.showToast({ title: '操作失败', icon: 'none' })
+        }
       } else if (res.tapIndex === 1) {
         uni.showToast({ title: '已拒绝', icon: 'none' })
-      } else if (res.tapIndex === 2) {
-        // 跳转详情
       }
     }
   })
 }
+
+async function fetchApprovals() {
+  loading.value = true
+  try {
+    const res = await getPendingApprovals()
+    if (res.success && res.data) {
+      approvalList.value = res.data.map(item => ({
+        id: item.id,
+        title: item.title || `审批事项 #${item.id}`,
+        type: item.bizType || 'ASSET',
+        typeLabel: getTypeLabel(item.bizType),
+        department: item.department || '-',
+        time: item.createdAt || '-',
+        status: item.status || 'PENDING'
+      }))
+    }
+  } catch (err) {
+    console.error('Failed to fetch approvals:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchApprovals()
+})
 </script>
 
 <style lang="scss">

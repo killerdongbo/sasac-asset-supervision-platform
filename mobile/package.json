@@ -9,8 +9,9 @@
     "build:h5": "uni build"
   },
   "dependencies": {
-    "vue": "^3.4.0",
-    "uni-app": "^3.0.0",
+    "@dcloudio/uni-app": "^3.0.0",
+    "@dcloudio/uni-mp-weixin": "^3.0.0",
+    "pinia": "^2.1.0",
     "uview-plus": "^3.0.0"
   },
   "devDependencies": {
