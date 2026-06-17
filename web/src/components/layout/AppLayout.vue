@@ -60,6 +60,22 @@
             <el-menu-item index="/depreciation"><span>折旧管理</span></el-menu-item>
           </el-sub-menu>
 
+          <el-sub-menu index="finance">
+            <template #title><el-icon><DataLine /></el-icon><span>财务监督</span></template>
+            <el-menu-item index="/finance/reports"><span>财务快报</span></el-menu-item>
+            <el-menu-item index="/finance/indicators"><span>财务指标</span></el-menu-item>
+            <el-menu-item index="/finance/funds"><span>资金监控</span></el-menu-item>
+            <el-menu-item index="/finance/budgets"><span>预算执行</span></el-menu-item>
+          </el-sub-menu>
+
+          <el-sub-menu index="property">
+            <template #title><el-icon><CollectionTag /></el-icon><span>产权管理</span></template>
+            <el-menu-item index="/property/registrations"><span>产权登记</span></el-menu-item>
+            <el-menu-item index="/property/tree"><span>产权树</span></el-menu-item>
+            <el-menu-item index="/property/transactions"><span>交易监测</span></el-menu-item>
+            <el-menu-item index="/property/assessments"><span>资产评估</span></el-menu-item>
+          </el-sub-menu>
+
           <el-sub-menu index="performance">
             <template #title><el-icon><DataAnalysis /></el-icon><span>业绩考核与薪酬</span></template>
             <el-menu-item index="/performance/indicators"><span>考核指标配置</span></el-menu-item>
@@ -80,6 +96,20 @@
             <el-menu-item index="/reports"><span>报表管理</span></el-menu-item>
             <el-menu-item index="/statistics/assets"><span>资产统计</span></el-menu-item>
             <el-menu-item index="/statistics/depreciation"><span>折旧统计</span></el-menu-item>
+          </el-sub-menu>
+
+          <el-sub-menu index="supervision-accountability">
+            <template #title><el-icon><WarningFilled /></el-icon><span>监督追责</span></template>
+            <el-menu-item index="/supervision/audit-plans"><span>审计计划</span></el-menu-item>
+            <el-menu-item index="/supervision/findings"><span>审计问题看板</span></el-menu-item>
+            <el-menu-item index="/supervision/rectifications"><span>整改跟踪</span></el-menu-item>
+            <el-menu-item index="/supervision/cases"><span>违规追责</span></el-menu-item>
+          </el-sub-menu>
+
+          <el-sub-menu index="majorevent">
+            <template #title><el-icon><FolderChecked /></el-icon><span>重大事项</span></template>
+            <el-menu-item index="/major-events"><span>事项列表</span></el-menu-item>
+            <el-menu-item index="/major-events/lawsuits-guarantees"><span>诉讼担保</span></el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="warn-audit">
@@ -133,6 +163,12 @@
         <el-menu-item index="/inspection-tasks">巡检管理</el-menu-item>
         <el-menu-item index="/inventory-tasks">盘点管理</el-menu-item>
         <el-menu-item index="/maintenance-requests">维保维修</el-menu-item>
+        <el-menu-item index="/depreciation">折旧管理</el-menu-item>
+        <el-menu-item index="/property/registrations">产权管理</el-menu-item>
+        <el-menu-item index="/finance/reports">财务监督</el-menu-item>
+        <el-menu-item index="/performance/indicators">业绩考核</el-menu-item>
+        <el-menu-item index="/supervision/rectifications">监督追责</el-menu-item>
+        <el-menu-item index="/major-events">重大事项</el-menu-item>
         <el-menu-item index="/approval/pending">待我审批</el-menu-item>
         <el-menu-item index="/alerts">预警中心</el-menu-item>
         <el-menu-item index="/statistics/group">集团统计</el-menu-item>

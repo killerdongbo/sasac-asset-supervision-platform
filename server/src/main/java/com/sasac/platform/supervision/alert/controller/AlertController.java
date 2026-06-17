@@ -48,4 +48,22 @@ public class AlertController {
         alertService.resolve(id, null);
         return ApiResponse.success(null);
     }
+
+    // ===== M11: 综合预警检查 =====
+
+    /**
+     * 综合预警检查: 运行所有维度规则并返回预警列表。
+     */
+    @PostMapping("/api/alerts/check-all")
+    public ApiResponse<java.util.List<AlertRecord>> checkAll(@RequestParam(required = false) Long tenantId) {
+        return ApiResponse.success(alertService.checkAll(tenantId));
+    }
+
+    /**
+     * 获取各维度预警计数。
+     */
+    @GetMapping("/api/alerts/check-counts")
+    public ApiResponse<java.util.Map<String, Long>> checkCounts(@RequestParam(required = false) Long tenantId) {
+        return ApiResponse.success(alertService.checkCounts(tenantId));
+    }
 }

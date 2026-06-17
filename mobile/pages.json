@@ -1,0 +1,100 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "工作台",
+        "navigationBarBackgroundColor": "#001529",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/approval/list",
+      "style": {
+        "navigationBarTitleText": "待审批",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/hr/salary",
+      "style": {
+        "navigationBarTitleText": "工资条"
+      }
+    },
+    {
+      "path": "pages/decision/approve",
+      "style": {
+        "navigationBarTitleText": "三重一大审批"
+      }
+    },
+    {
+      "path": "pages/project/progress",
+      "style": {
+        "navigationBarTitleText": "项目进度填报"
+      }
+    },
+    {
+      "path": "pages/invest/portfolio",
+      "style": {
+        "navigationBarTitleText": "投资项目"
+      }
+    },
+    {
+      "path": "pages/finance/snapshot",
+      "style": {
+        "navigationBarTitleText": "财务快报"
+      }
+    },
+    {
+      "path": "pages/alerts/index",
+      "style": {
+        "navigationBarTitleText": "预警消息"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "湛江国资",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#001529",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tab/workbench.png",
+        "selectedIconPath": "static/tab/workbench-active.png",
+        "text": "工作台"
+      },
+      {
+        "pagePath": "pages/approval/list",
+        "iconPath": "static/tab/approval.png",
+        "selectedIconPath": "static/tab/approval-active.png",
+        "text": "审批"
+      },
+      {
+        "pagePath": "pages/alerts/index",
+        "iconPath": "static/tab/message.png",
+        "selectedIconPath": "static/tab/message-active.png",
+        "text": "消息"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tab/me.png",
+        "selectedIconPath": "static/tab/me-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^u-(.*)": "uview-plus/components/u-$1/u-$1.vue"
+    }
+  }
+}

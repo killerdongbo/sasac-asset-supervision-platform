@@ -1,0 +1,21 @@
+{
+  "name": "sasac-mobile",
+  "version": "1.0.0",
+  "description": "湛江国资移动端",
+  "scripts": {
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "dev:h5": "uni",
+    "build:h5": "uni build"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "uni-app": "^3.0.0",
+    "uview-plus": "^3.0.0"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-ui": "^1.4.0",
+    "sass": "^1.69.0",
+    "sass-loader": "^13.0.0"
+  }
+}
