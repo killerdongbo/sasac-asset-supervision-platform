@@ -105,6 +105,11 @@ const router = createRouter({
         { path: 'hr/contracts/create', name: 'HrContractCreate', component: () => import('@/views/hr/ContractForm.vue') },
         { path: 'hr/contracts/:id/edit', name: 'HrContractEdit', component: () => import('@/views/hr/ContractForm.vue') },
         { path: 'hr/changes', name: 'HrChangeList', component: () => import('@/views/hr/ChangeList.vue') },
+        { path: 'hr/salaries', name: 'HrSalaryList', component: () => import('@/views/hr/SalaryList.vue') },
+        { path: 'hr/attendances', name: 'HrAttendanceList', component: () => import('@/views/hr/AttendanceList.vue') },
+        { path: 'hr/performances', name: 'HrPerformanceList', component: () => import('@/views/hr/PerformanceList.vue') },
+        { path: 'hr/recruitments', name: 'HrRecruitmentList', component: () => import('@/views/hr/RecruitmentList.vue') },
+        { path: 'hr/trainings', name: 'HrTrainingList', component: () => import('@/views/hr/TrainingList.vue') },
 
         // ===== 系统管理 =====
         { path: 'users', name: 'UserManage', component: () => import('@/views/system/UserManage.vue') },
