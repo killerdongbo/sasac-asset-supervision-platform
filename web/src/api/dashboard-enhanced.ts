@@ -39,11 +39,10 @@ export function getRecentAlerts(): Promise<{ data: AlertItem[] }> {
  * 综合态势 - 调用各模块API并行获取聚合数据
  * 如果后端API尚未ready，使用后端聚合接口
  */
-export function getAggregatedData(): Promise<{
+export async function getAggregatedData(): Promise<{
   overview: EnhancedOverview
   recentAlerts: AlertItem[]
 }> {
-  return client.get('/dashboard-enhanced/aggregated') as Promise<{
-    data: { overview: EnhancedOverview; recentAlerts: AlertItem[] }
-  }>.then(res => res.data)
+  const res = await client.get('/dashboard-enhanced/aggregated') as { data: { overview: EnhancedOverview; recentAlerts: AlertItem[] } }
+  return res.data
 }
