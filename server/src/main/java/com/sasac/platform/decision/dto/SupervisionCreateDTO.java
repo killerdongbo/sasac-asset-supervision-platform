@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 /**
  * DTO for creating a new decision supervision task.
  */
@@ -20,5 +22,5 @@ public class SupervisionCreateDTO {
 
     private String assigneeName;
 
-    private String deadline;
+    private LocalDate deadline;
 }

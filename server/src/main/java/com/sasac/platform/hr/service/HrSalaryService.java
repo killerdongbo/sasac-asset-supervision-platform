@@ -108,7 +108,7 @@ public class HrSalaryService {
         // Base salary (default 8000 if not set on employee)
         BigDecimal baseSalary = employee.getPosition() != null
                 ? DEFAULT_BASE_SALARY
-                : DEFAULT_BASE_SALARY;
+                : new BigDecimal("5000");  // 无岗位默认为5000
         salary.setBaseSalary(baseSalary);
 
         // Performance pay = finalScore x 100 (if performance exists)

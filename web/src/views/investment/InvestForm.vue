@@ -70,6 +70,9 @@ const isEdit = !!route.params.id
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 
+const orgId = ref(Number(localStorage.getItem('orgId') || 1))
+const tenantId = ref(Number(localStorage.getItem('tenantId') || 1))
+
 const investTypeMap: Record<string, string> = {
   EQUITY: '股权投资',
   DEBT: '债权投资',
@@ -129,8 +132,8 @@ async function handleSubmit() {
     } else {
       await createInvestmentProject({
         ...form,
-        orgId: 1,
-        tenantId: 1
+        orgId: orgId.value,
+        tenantId: tenantId.value
       } as any)
       ElMessage.success('创建成功')
     }

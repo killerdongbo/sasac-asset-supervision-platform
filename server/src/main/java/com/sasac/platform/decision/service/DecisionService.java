@@ -122,6 +122,10 @@ public class DecisionService {
      */
     @Transactional
     public DecisionSupervision createSupervision(Long resolutionId, SupervisionCreateDTO dto) {
+        DecisionResolution resolution = resolutionMapper.selectById(resolutionId);
+        if (resolution == null) {
+            throw new BusinessException("决议不存在");
+        }
         DecisionSupervision sup = new DecisionSupervision();
         BeanUtils.copyProperties(dto, sup);
         sup.setResolutionId(resolutionId);
@@ -141,5 +145,42 @@ public class DecisionService {
                 new LambdaQueryWrapper<DecisionSupervision>()
                         .eq(DecisionSupervision::getTenantId, tenantId)
                         .eq(DecisionSupervision::getStatus, "PENDING"));
+    }
+
+    /**
+     * Updates the progress note of a supervision task.
+     *
+     * @param id           the supervision task ID
+     * @param progressNote the progress note to update
+     * @return the updated supervision task
+     * @throws BusinessException if the task is not found or already completed
+     */
+    @Transactional
+    public DecisionSupervision updateProgress(Long id, String progressNote) {
+        DecisionSupervision sup = supervisionMapper.selectById(id);
+        if (sup == null) {
+            throw new BusinessException("督办任务不存在");
+        }
+        sup.setProgressNote(progressNote);
+        supervisionMapper.updateById(sup);
+        return supervisionMapper.selectById(id);
+    }
+
+    /**
+     * Marks a supervision task as completed.
+     *
+     * @param id the supervision task ID
+     * @return the completed supervision task
+     * @throws BusinessException if the task is not found
+     */
+    @Transactional
+    public DecisionSupervision completeSupervision(Long id) {
+        DecisionSupervision sup = supervisionMapper.selectById(id);
+        if (sup == null) {
+            throw new BusinessException("督办任务不存在");
+        }
+        sup.setStatus("COMPLETED");
+        supervisionMapper.updateById(sup);
+        return supervisionMapper.selectById(id);
     }
 }

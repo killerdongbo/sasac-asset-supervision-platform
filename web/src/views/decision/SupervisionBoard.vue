@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getPendingSupervisions, type DecisionSupervision } from '@/api/decision'
+import { getPendingSupervisions, updateSupervisionProgress, completeSupervision, type DecisionSupervision } from '@/api/decision'
 
 const loading = ref(false)
 const supervisions = ref<DecisionSupervision[]>([])
@@ -107,7 +107,7 @@ const confirmUpdateProgress = async () => {
   if (!currentRow.value) return
   updating.value = true
   try {
-    // In a real implementation, call an API to update progress
+    await updateSupervisionProgress(currentRow.value.id, { progressNote: progressForm.value.note })
     ElMessage.success('进度已更新')
     dialogVisible.value = false
     await fetchData()
@@ -118,7 +118,7 @@ const confirmUpdateProgress = async () => {
 
 const handleComplete = async (row: DecisionSupervision) => {
   try {
-    // In a real implementation, call an API to mark as completed
+    await completeSupervision(row.id)
     ElMessage.success('督办任务已办结')
     await fetchData()
   } catch {

@@ -130,3 +130,11 @@ export function createSupervision(resolutionId: number, data: {
 export function getPendingSupervisions(tenantId: number) {
   return client.get('/decision/supervisions/pending', { params: { tenantId } }) as Promise<{ data: DecisionSupervision[] }>
 }
+
+export function updateSupervisionProgress(id: string, data: { progressNote: string }) {
+  return client.put(`/decision/supervisions/${id}/progress`, data)
+}
+
+export function completeSupervision(id: string) {
+  return client.put(`/decision/supervisions/${id}/complete`)
+}

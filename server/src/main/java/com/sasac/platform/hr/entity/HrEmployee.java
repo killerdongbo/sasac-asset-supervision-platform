@@ -3,6 +3,7 @@ package com.sasac.platform.hr.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sasac.platform.common.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +28,7 @@ public class HrEmployee extends BaseEntity {
     /**
      * Organization ID this employee belongs to.
      */
-    @NotBlank(message = "组织ID不能为空")
+    @NotNull(message = "组织ID不能为空")
     private Long orgId;
 
     /**

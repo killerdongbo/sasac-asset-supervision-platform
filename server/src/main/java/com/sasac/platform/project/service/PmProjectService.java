@@ -8,9 +8,11 @@ import com.sasac.platform.project.dto.ProjectCreateDTO;
 import com.sasac.platform.project.dto.ProjectQueryDTO;
 import com.sasac.platform.project.dto.ProgressRecordDTO;
 import com.sasac.platform.project.entity.PmAcceptance;
+import com.sasac.platform.project.entity.PmBudget;
 import com.sasac.platform.project.entity.PmProject;
 import com.sasac.platform.project.entity.PmProgress;
 import com.sasac.platform.project.mapper.PmAcceptanceMapper;
+import com.sasac.platform.project.mapper.PmBudgetMapper;
 import com.sasac.platform.project.mapper.PmProjectMapper;
 import com.sasac.platform.project.mapper.PmProgressMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class PmProjectService {
     private final PmProjectMapper pmProjectMapper;
     private final PmProgressMapper pmProgressMapper;
     private final PmAcceptanceMapper pmAcceptanceMapper;
+    private final PmBudgetMapper pmBudgetMapper;
 
     /**
      * Creates a new project with auto-generated project number and DRAFT status.
@@ -190,5 +193,29 @@ public class PmProjectService {
         acceptance.setProjectId(id);
 
         pmAcceptanceMapper.insert(acceptance);
+    }
+
+    /**
+     * Retrieves acceptance records for a project.
+     *
+     * @param projectId the project ID
+     * @return list of acceptance records
+     */
+    public List<PmAcceptance> getAcceptanceByProjectId(Long projectId) {
+        LambdaQueryWrapper<PmAcceptance> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmAcceptance::getProjectId, projectId);
+        return pmAcceptanceMapper.selectList(wrapper);
+    }
+
+    /**
+     * Retrieves budget records for a project.
+     *
+     * @param projectId the project ID
+     * @return list of budget records
+     */
+    public List<PmBudget> getBudgetsByProjectId(Long projectId) {
+        LambdaQueryWrapper<PmBudget> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmBudget::getProjectId, projectId);
+        return pmBudgetMapper.selectList(wrapper);
     }
 }

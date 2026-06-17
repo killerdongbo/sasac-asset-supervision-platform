@@ -17,12 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for 三重一大 decision management.
@@ -100,5 +102,22 @@ public class DecisionController {
     public ResponseEntity<ApiResponse<List<DecisionSupervision>>> pendingSupervisions(@RequestParam Long tenantId) {
         List<DecisionSupervision> list = decisionService.queryPendingSupervisions(tenantId);
         return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
+    /**
+     * Updates the progress note of a supervision task.
+     */
+    @PutMapping("/supervisions/{id}/progress")
+    public ResponseEntity<ApiResponse<DecisionSupervision>> updateProgress(
+            @PathVariable Long id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(ApiResponse.success(decisionService.updateProgress(id, body.get("progressNote"))));
+    }
+
+    /**
+     * Marks a supervision task as completed.
+     */
+    @PutMapping("/supervisions/{id}/complete")
+    public ResponseEntity<ApiResponse<DecisionSupervision>> complete(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(decisionService.completeSupervision(id)));
     }
 }

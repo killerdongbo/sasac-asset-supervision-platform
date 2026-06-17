@@ -9,7 +9,6 @@ import com.sasac.platform.project.dto.ProgressRecordDTO;
 import com.sasac.platform.project.entity.PmAcceptance;
 import com.sasac.platform.project.entity.PmProject;
 import com.sasac.platform.project.entity.PmProgress;
-import com.sasac.platform.project.mapper.PmAcceptanceMapper;
 import com.sasac.platform.project.service.PmProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +34,6 @@ import java.util.List;
 public class PmProjectController {
 
     private final PmProjectService pmProjectService;
-    private final PmAcceptanceMapper pmAcceptanceMapper;
-    private final com.sasac.platform.project.mapper.PmBudgetMapper pmBudgetMapper;
 
     /**
      * Creates a new project.
@@ -125,10 +122,7 @@ public class PmProjectController {
      */
     @GetMapping("/{id}/acceptance")
     public ResponseEntity<ApiResponse<List<PmAcceptance>>> getAcceptance(@PathVariable Long id) {
-        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<PmAcceptance> wrapper =
-                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
-        wrapper.eq(PmAcceptance::getProjectId, id);
-        List<PmAcceptance> records = pmAcceptanceMapper.selectList(wrapper);
+        List<PmAcceptance> records = pmProjectService.getAcceptanceByProjectId(id);
         return ResponseEntity.ok(ApiResponse.success(records));
     }
 
@@ -137,10 +131,7 @@ public class PmProjectController {
      */
     @GetMapping("/{id}/budgets")
     public ResponseEntity<ApiResponse<List<com.sasac.platform.project.entity.PmBudget>>> getBudgets(@PathVariable Long id) {
-        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.sasac.platform.project.entity.PmBudget> wrapper =
-                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
-        wrapper.eq(com.sasac.platform.project.entity.PmBudget::getProjectId, id);
-        List<com.sasac.platform.project.entity.PmBudget> records = pmBudgetMapper.selectList(wrapper);
+        List<com.sasac.platform.project.entity.PmBudget> records = pmProjectService.getBudgetsByProjectId(id);
         return ResponseEntity.ok(ApiResponse.success(records));
     }
 }
